@@ -1,0 +1,246 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Drawer</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #386a9c;
+      }
+      #container {
+        display: flex;
+        align-items: flex-start;
+      }
+
+      #canvas-container {
+        margin-right: 20px;
+        border: 1px solid #ccc;
+        background-color: #ffffff;
+        width: 800px;
+        height: 800px;
+      }
+
+      #toolbox {
+        width: 200px;
+        padding: 10px;
+        background-color: #f0f0f0;
+        border-radius: 5px;
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+      }
+
+      #toolbox label {
+        display: block;
+        margin-bottom: 5px;
+      }
+
+      .color-box {
+        width: 30px;
+        height: 30px;
+        border: 1px solid #000;
+        display: inline-block;
+        margin: 5px;
+        cursor: pointer;
+      }
+
+      #clear-button {
+        margin-top: 10px;
+        padding: 5px 10px;
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+
+      #messages {
+        list-style-type: none;
+        margin: 20px;
+        padding: 0;
+        overflow-y: auto;
+        max-height: 60vh;
+      }
+
+      #messages li {
+        padding: 10px;
+        background-color: #f0f0f0;
+        margin-bottom: 5px;
+        border-radius: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="container">
+      <div id="canvas-container">
+        <canvas id="myCanvas"></canvas>
+      </div>
+      <div id="toolbox">
+        <label for="category">Category:</label>
+        <select id="category">
+            <option value="verbs">Verbs</option>
+            <option value="nouns">Nouns</option>
+            <option value="easy">Easy</option>
+            <option value="hard">Hard</option>
+        </select>
+        <button id="selectCategory">Select Category</button>
+        <div id="colorPalette">
+          <label for="color-box">Color Palette:</label>
+          <div class="color-box" style="background-color: black;"></div>
+          <div class="color-box" style="background-color: red;"></div>
+          <div class="color-box" style="background-color: blue;"></div>
+          <div class="color-box" style="background-color: yellow;"></div>
+          <div class="color-box" style="background-color: orange;"></div>
+          <div class="color-box" style="background-color: purple;"></div>
+          <div class="color-box" style="background-color: green;"></div>
+          <div class="color-box" style="background-color: grey;"></div>
+          <div class="color-box" style="background-color: #7B3F00;"></div>
+        </div>
+        <label for="strokeWidth">Stroke Width:</label>
+        <input type="range" id="strokeWidth" min="1" max="50" value="5">
+        <button id="eraser">Eraser</button>
+        <button id="clear-button">Clear</button>
+      </div>
+      <div id="wordDisplay"></div>
+    </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+    <script>
+      $(() => {
+        let socket = io();
+        let canvas = document.getElementById("myCanvas");
+        let ctx = canvas.getContext("2d");
+        let obj = {};
+
+        // Initialize drawing properties
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 5;
+
+        // Function to set stroke color
+        function setColor(color) {
+          ctx.strokeStyle = color;
+          socket.emit('colorChange', color);
+        }
+         // Handle category selection by the drawer
+         $('#selectCategory').click(function() {
+            let category = $('#category').val();
+            socket.emit('categorySelection', category);
+        });
+
+        // Set color from palette
+        $('.color-box').click(function() {
+          let color = $(this).css("background-color");
+          setColor(color);
+        });
+
+        // Function to set stroke width
+        $('#strokeWidth').change(function() {
+          let width = $(this).val();
+          ctx.lineWidth = width;
+          socket.emit('widthChange', width);
+        });
+
+        // Function to set eraser mode
+        $('#eraser').click(function() {
+          ctx.strokeStyle = "#ffffff"; // Set color to white for erasing
+          socket.emit('eraser');
+        });
+
+        let isDrawing = false;
+
+        $('#clear-button').click(() => {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          socket.emit('clearCanvas');
+        });
+        
+
+        $("#myCanvas").mousedown((e) => {
+          isDrawing = true;
+
+          ctx.moveTo(e.clientX, e.clientY);
+          obj.x = e.clientX;
+          obj.y = e.clientY;
+          socket.emit('mdown', obj);
+        });
+
+        $("#myCanvas").mousemove((e) => {
+          if (isDrawing) {
+            ctx.lineTo(e.clientX, e.clientY);
+            ctx.stroke();
+            obj.x = e.clientX;
+            obj.y = e.clientY;
+            socket.emit('mmove', obj);
+          }
+        });
+
+        $("#myCanvas").mouseup(() => {
+          isDrawing = false;
+        });
+
+        canvas.addEventListener('dragover', (e) => {
+          e.stopPropagation();
+          e.preventDefault();
+          e.dataTransfer.dropEffect = 'copy';
+        });
+
+        canvas.addEventListener('drop', (e) => {
+          e.stopPropagation();
+          e.preventDefault();
+          var files = e.dataTransfer.files; // Array of all files
+
+          for (var i = 0, file; file = files[i]; i++) {
+            if (file.type.match(/image.*/)) {
+              var reader = new FileReader();
+
+              reader.onload = function (e2) {
+                var img = document.createElement('img');
+                img.src = e2.target.result;
+                ctx.drawImage(img, e.offsetX, e.offsetY);
+                let obj = {};
+                obj.x = e.offsetX;
+                obj.y = e.offsetY;
+                obj.img = img.src;
+                socket.emit("image", obj)
+              }
+
+              reader.readAsDataURL(file); // start reading the file data.
+            }
+          }
+        });
+
+      });
+
+      $(function () {
+        var socket = io();
+
+        socket.on('mdown', (obj) => {
+          let canvas = document.getElementById("myCanvas");
+          let ctx = canvas.getContext("2d");
+          ctx.beginPath();
+          ctx.moveTo(obj.x, obj.y);
+        });
+
+        socket.on('mmove', (obj) => {
+          let canvas = document.getElementById("myCanvas");
+          let ctx = canvas.getContext("2d");
+          ctx.lineTo(obj.x, obj.y);
+          ctx.stroke();
+        });
+
+        socket.on('image', (obj) => {
+          let canvas = document.getElementById("myCanvas");
+          let ctx = canvas.getContext("2d");
+          let img = new Image();
+          img.src = obj.img
+          ctx.drawImage(img, obj.x, obj.y);
+        });
+       
+        // Listen for the selected word from the server
+        socket.on('wordSelection', function(word) {
+          // Display the selected word to the drawer
+          $('#wordDisplay').text("Your word to draw is: " + word);
+        });
+
+        
+      });
+    </script>
+  </body>
+</html>

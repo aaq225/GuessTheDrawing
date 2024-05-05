@@ -1,0 +1,169 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Guesser</title>
+    <style>
+    /* * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    } */
+
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #386a9c;
+    }
+
+    #container {
+      display: flex;
+      align-items: flex-start;
+    }
+
+    /* canvas {
+     
+      border: 1px solid #ccc;
+      display: flex;
+      margin: 20px auto;
+      background-color: #ffffff;
+    } */
+
+
+    #canvas-container {
+        margin-right: 20px;
+        border: 1px solid #ccc;
+        background-color: #ffffff;
+        width: 800px;
+        height: 800px;
+      }
+
+    #messages {
+      list-style-type: none;
+      margin: 20px;
+      padding: 0;
+      overflow-y: auto;
+      max-height: 800px; /* Limiting the height of the message list */
+    }
+
+    #messages li {
+      padding: 10px;
+      background-color: #f0f0f0;
+      margin-bottom: 5px;
+      border-radius: 5px;
+    }
+
+    form {
+      background-color: #fff;
+      padding: 10px;
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      width: 55%;
+    }
+
+    form input {
+      border: 1px solid #ccc;
+      padding: 10px;
+      margin-right: 10px;
+      width: 60%;
+      border-radius: 5px;
+    }
+
+    form button {
+      width: 36%;
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      padding: 10px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    </style>
+  </head>
+  <body>
+    <div id="container">
+      <div id="canvas-container">
+        <canvas id="myCanvas"></canvas>
+      </div>
+      <ul id="messages"></ul>
+      <form action="">
+        <input id="m" autocomplete="off" /><button>Send</button>
+      </form>
+    </div>
+    
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+    <script>
+      let socket = io();
+      let canvas = document.getElementById("myCanvas");
+      let ctx = canvas.getContext("2d");
+      let obj = {};
+      let history = [];
+
+      // Initialize drawing properties
+      ctx.strokeStyle = "#000000";
+      ctx.lineWidth = 5;
+
+      let isDrawing = false;
+
+      socket.on("mdown", (obj) => {
+        ctx.beginPath();
+        ctx.moveTo(obj.x, obj.y);
+      
+      });
+
+      socket.on("mmove", (obj) => {
+        ctx.lineTo(obj.x, obj.y);
+        ctx.stroke();
+      });
+
+      socket.on('image', (obj) => {
+        let img = new Image();
+        img.src = obj.img
+        ctx.drawImage(img, obj.x, obj.y);
+      });
+
+      // Listen for color change event from draw.html
+      socket.on('colorChange', function(color) {
+        ctx.strokeStyle = color; // Update stroke color
+      });
+
+      // Listen for width change event from draw.html
+      socket.on('widthChange', function(width) {
+        ctx.lineWidth = width; // Update stroke width
+      });
+
+      // Listen for eraser event from draw.html
+      socket.on('eraser', function() {
+        ctx.strokeStyle = "#ffffff"; // Set color to white for erasing
+      });
+      
+      socket.on('clearCanvas', function() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+      });
+
+      // socket.on('undoStroke', function() {
+      //   let ctx = canvas.getContext("2d");
+      //   ctx.clearRect(0, 0, canvas.width, canvas.height);
+      //   if (history.length > 0) {
+      //       ctx.putImageData(history.pop(), 0, 0);
+      //   }
+      // });
+
+      socket.on('chat message', function(msg){
+        $('#messages').prepend($('<li>').text(msg));
+      });
+
+      $(function () {
+        $('form').submit(function(e){
+          e.preventDefault(); // prevents page reloading
+          socket.emit('chat message', $('#m').val());
+          $('#m').val('');
+          return false;
+        });
+      });
+    </script>
+  </body>
+</html>
