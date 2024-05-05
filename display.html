@@ -164,6 +164,10 @@
           return false;
         });
       });
+
+      socket.on('switchRoles', function() {
+          window.location.href = '/draw';
+      });
     </script>
   </body>
 </html>

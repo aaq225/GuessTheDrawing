@@ -83,6 +83,9 @@ io.on('connection', function (socket) {
       console.log("Time is up!");
       io.emit('chat message', "Time is up!");
       currentWord = '';
+      setTimeout(() => {
+        io.sockets.emit('switchRoles');
+      }, 3000);
     }, 5000);
   });
 
@@ -112,6 +115,9 @@ io.on('connection', function (socket) {
       feedback = 'Correct guess!';
       clearTimeout(timer);
       currentWord = '';
+      setTimeout(() => {
+        io.sockets.emit('switchRoles');
+      }, 3000);
     } else if (currentWord && (await checkSynonym(currentWord, msg))) {
       feedback = 'You guessed a synonym!';
     } else {

@@ -247,6 +247,10 @@
           $('#wordDisplay').text("Your word to draw is: " + word);
         });
 
+        socket.on('switchRoles', function() {
+          window.location.href = '/display';
+        });
+
         
       });
     </script>
