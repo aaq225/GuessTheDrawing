@@ -234,12 +234,12 @@
           // Display the selected word to the drawer
           $('#wordDisplay').text("Your word to draw is: " + word);
         });
-      });
 
-      socket.on('switchRoles', function() {
+        socket.on('switchRoles', function() {
           window.location.href = '/display';
-        });
-
+      });
+      
+      });
 
       $(document).ready(() => {
         const username = localStorage.getItem('username');
