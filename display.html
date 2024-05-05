@@ -11,7 +11,7 @@
 
     body {
       font-family: Arial, sans-serif;
-      background-color: #386a9c;
+      background-color:#4C5FA2;
     }
 
     #container {
@@ -19,21 +19,19 @@
       align-items: flex-start;
     }
 
-    canvas {
+    /* canvas {
      
       border: 1px solid #ccc;
       display: flex;
-      /* margin: 20px auto; */
+      margin: 20px auto;
       background-color: #ffffff;
-    }
+    } */
 
 
     #canvas-container {
       margin-right: 20px;
       border: 1px solid #ccc;
       background-color: #ffffff;
-      /* width: 50%;
-      height: 800px; */
     }
 
     #messages {
@@ -164,9 +162,11 @@
           return false;
         });
       });
-
-      socket.on('switchRoles', function() {
-          window.location.href = '/draw';
+      $(document).ready(() => {
+        const username = localStorage.getItem('username');
+        if (username) {
+            $.post('/homepage', { username });
+        }
       });
     </script>
   </body>

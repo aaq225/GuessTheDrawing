@@ -5,7 +5,7 @@
     <style>
       body {
         font-family: Arial, sans-serif;
-        background-color: #386a9c;
+        background-color: #4C5FA2;
       }
       #container {
         display: flex;
@@ -13,19 +13,9 @@
       }
 
       #canvas-container {
-        /* margin-right: 20px; */
+        margin-right: 20px;
         border: 1px solid #ccc;
         background-color: #ffffff;
-        /* width: 50%;
-        height: 800px; */
-      }
-
-      #myCanvas {
-        /* margin-right: 20px; */
-        border: 1px solid #ccc;
-        background-color: #ffffff;
-        /*width: 50%;
-        height: 800px;*/
       }
 
       #toolbox {
@@ -79,7 +69,7 @@
   <body>
     <div id="container">
       <div id="canvas-container">
-        <canvas id="myCanvas" width = "800" height = "800"></canvas>
+        <canvas id="myCanvas" width = 800 height = 800></canvas>
       </div>
       <div id="toolbox">
         <label for="category">Category:</label>
@@ -246,13 +236,15 @@
           // Display the selected word to the drawer
           $('#wordDisplay').text("Your word to draw is: " + word);
         });
-
-        socket.on('switchRoles', function() {
-          window.location.href = '/display';
-        });
-
         
       });
+
+      $(document).ready(() => {
+        const username = localStorage.getItem('username');
+        if (username) {
+            $.post('/homepage', { username });
+        }
+    });
     </script>
   </body>
 </html>

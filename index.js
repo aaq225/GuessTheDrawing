@@ -10,6 +10,7 @@ const app = express();
 const server = http.createServer(app);
 const io = socketio(server);
 app.use(express.static(path.join(__dirname, 'public')));
+app.use('/images', express.static(path.join(__dirname, 'images')));
 app.use(bodyParser.urlencoded({ extended: true })); 
 
 let player1 = null;
