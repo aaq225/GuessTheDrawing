@@ -3,11 +3,34 @@ const path = require('path');
 const http = require('http');
 const socketio = require('socket.io');
 const axios = require('axios');
+const bodyParser = require('body-parser'); 
 const { Profanity, ProfanityOptions } = require('@2toad/profanity');
 
 const app = express();
 const server = http.createServer(app);
 const io = socketio(server);
+app.use(express.static(path.join(__dirname, 'public')));
+app.use(bodyParser.urlencoded({ extended: true })); 
+
+let player1 = null;
+let player2 = null;
+
+app.get('/homepage', function (req, res) {
+  res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+app.post('/homepage', function (req, res) { 
+  const { username } = req.body;
+  if (!player1) {
+    player1 = username;
+    res.json({ redirectUrl: '/draw' });
+  } else if (!player2) {
+    player2 = username;
+    res.json({ redirectUrl: '/display' });
+  } else {
+    res.status(400).send('Game is full');
+  }
+});
 
 app.get('/', function (req, res) {
   res.redirect('/draw');

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guess the Drawing</title>
+</head>
+<body>
+    <h1>Guess the Drawing</h1>
+    <form id="usernameForm">
+        <label for="username">Enter your username:</label>
+        <input type="text" id="username" name="username" required>
+        <button type="submit">Start Game</button>
+    </form>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(() => {
+            $('#usernameForm').submit((event) => {
+                event.preventDefault();
+                const username = $('#username').val().trim();
+                if (username !== '') {
+                    $.post('/homepage', { username }, (response) => {
+                        window.location.href = response.redirectUrl;
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
