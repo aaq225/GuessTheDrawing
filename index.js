@@ -65,6 +65,7 @@ const wordCategories = {
 let randomWord = 'apple';
 
 let currentWord = '';
+let timer = 0;
 
 io.on('connection', function (socket) {
   socket.on('categorySelection', async function (category) {
@@ -78,7 +79,7 @@ io.on('connection', function (socket) {
     console.log('Synonyms:', synonyms);
 
     io.emit('wordSelection', currentWord);
-    setTimeout(() => {
+    timer = setTimeout(() => {
       console.log("Time is up!");
       io.emit('chat message', "Time is up!");
       currentWord = '';
@@ -109,6 +110,8 @@ io.on('connection', function (socket) {
     // Check if it's a correct guess or synonym
     if (currentWord && msg.toLowerCase() === currentWord.toLowerCase()) {
       feedback = 'Correct guess!';
+      clearTimeout(timer);
+      currentWord = '';
     } else if (currentWord && (await checkSynonym(currentWord, msg))) {
       feedback = 'You guessed a synonym!';
     } else {
