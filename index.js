@@ -24,13 +24,16 @@ const wordCategories = {
   hard: ['elephant', 'ocean', 'mountain', 'universe', 'galaxy']
 };
 
+let randomWord = 'apple';
+
 // Handle category selection from the drawer
 io.on('connection', function(socket){
   socket.on('categorySelection', function(category) {
     // Get a random word from the selected category
     const words = wordCategories[category];
     const randomIndex = Math.floor(Math.random() * words.length);
-    const randomWord = words[randomIndex];
+    // const randomWord = words[randomIndex];
+    randomWord = words[randomIndex];
     console.log("Received word:", randomWord);
     // Emit the randomly selected word to the drawer
     io.emit('wordSelection', randomWord);
@@ -56,10 +59,11 @@ io.on('connection', function(socket){
   socket.on('chat message', function(msg){
     console.log("Received message:", msg);
     io.emit('chat message', msg);
-    // if(msg) // synonym checking
-    // {
-    //   io.emit('chat message', "Your guess was close!");
-    // }
+    if(msg.localeCompare(randomWord))
+    {
+      console.log("Correct guess");
+      io.emit('chat message', "You guessed the word correctly!");
+    }
   });
 
   // Broadcast stroke color changes to all clients
