@@ -62,6 +62,8 @@ const wordCategories = {
   hard: ['elephant', 'ocean', 'mountain', 'universe', 'galaxy'],
 };
 
+let randomWord = 'apple';
+
 let currentWord = '';
 
 io.on('connection', function (socket) {
