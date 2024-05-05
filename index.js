@@ -33,7 +33,7 @@ app.post('/homepage', function (req, res) {
 });
 
 app.get('/', function (req, res) {
-  res.redirect('/draw');
+  res.redirect('/homepage');
 });
 
 app.get('/draw', function (req, res) {
