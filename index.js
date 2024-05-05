@@ -78,6 +78,11 @@ io.on('connection', function (socket) {
     console.log('Synonyms:', synonyms);
 
     io.emit('wordSelection', currentWord);
+    setTimeout(() => {
+      console.log("Time is up!");
+      io.emit('chat message', "Time is up!");
+      currentWord = '';
+    }, 5000);
   });
 
   socket.on('mdown', (obj) => {
