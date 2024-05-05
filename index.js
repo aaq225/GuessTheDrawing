@@ -80,8 +80,8 @@ io.on('connection', function (socket) {
 
     io.emit('wordSelection', currentWord);
     timer = setTimeout(() => {
-      console.log("Time is up!");
-      io.emit('chat message', "Time is up!");
+      console.log("Time is up! (Switching turns in 3 seconds.)");
+      io.emit('chat message', "Time is up! (Switching turns in 3 seconds.)");
       currentWord = '';
       setTimeout(() => {
         io.sockets.emit('switchRoles');
@@ -112,7 +112,7 @@ io.on('connection', function (socket) {
 
     // Check if it's a correct guess or synonym
     if (currentWord && msg.toLowerCase() === currentWord.toLowerCase()) {
-      feedback = 'Correct guess!';
+      feedback = 'Correct guess! (Switching turns in 3 seconds.)';
       clearTimeout(timer);
       currentWord = '';
       setTimeout(() => {
