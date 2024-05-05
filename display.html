@@ -162,6 +162,11 @@
           return false;
         });
       });
+
+      socket.on('switchRoles', function() {
+          window.location.href = '/draw';
+      });
+      
       $(document).ready(() => {
         const username = localStorage.getItem('username');
         if (username) {

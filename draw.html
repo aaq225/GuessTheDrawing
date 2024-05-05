@@ -49,7 +49,6 @@
         border-radius: 5px;
         cursor: pointer;
       }
-
       #messages {
         list-style-type: none;
         margin: 20px;
@@ -148,7 +147,6 @@
           ctx.clearRect(0, 0, canvas.width, canvas.height);
           socket.emit('clearCanvas');
         });
-        
 
         $("#myCanvas").mousedown((e) => {
           isDrawing = true;
@@ -236,14 +234,19 @@
           // Display the selected word to the drawer
           $('#wordDisplay').text("Your word to draw is: " + word);
         });
-        
       });
+
+      socket.on('switchRoles', function() {
+          window.location.href = '/display';
+        });
+
 
       $(document).ready(() => {
         const username = localStorage.getItem('username');
         if (username) {
             $.post('/homepage', { username });
         }
+
     });
     </script>
   </body>
