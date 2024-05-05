@@ -1,45 +1,82 @@
-var app = require('express')();
-var http = require('http').Server(app);
-var io = require('socket.io')(http);
+const express = require('express');
+const path = require('path');
+const http = require('http');
+const socketio = require('socket.io');
+const axios = require('axios');
+const { Profanity, ProfanityOptions } = require('@2toad/profanity');
 
-app.get('/', function(req, res){
+const app = express();
+const server = http.createServer(app);
+const io = socketio(server);
+
+app.get('/', function (req, res) {
   res.redirect('/draw');
 });
 
-app.get('/draw', function(req, res){
+app.get('/draw', function (req, res) {
   res.sendFile(__dirname + '/draw.html');
 });
 
-app.get('/display', function(req, res){
+app.get('/display', function (req, res) {
   res.sendFile(__dirname + '/display.html');
 });
 
-let displaysocket = null;
-// Define an array of word categories
+const options = new ProfanityOptions();
+options.wholeWord = true; // adjust options as necessary
+options.grawlix = '*****';
 
+const profanityFilter = new Profanity(options);
+
+// Initialize the dictionary API
+const API_KEY = '2f813304-ff2f-4e72-89a8-363b6ab13040'; // Replace with your Merriam-Webster API key
+async function getSynonyms(targetWord) {
+  const url = `https://www.dictionaryapi.com/api/v3/references/thesaurus/json/${encodeURIComponent(targetWord)}?key=${API_KEY}`;
+
+  try {
+    const response = await axios.get(url);
+    const entries = response.data;
+
+    if (!entries.length || !entries[0].meta) {
+      console.error(`No synonyms found for the target word: ${targetWord}`);
+      return [];
+    }
+
+    const synonyms = entries[0].meta.syns.flat();
+    return synonyms;
+  } catch (error) {
+    console.error('Error fetching synonyms:', error);
+    return [];
+  }
+}
+
+async function checkSynonym(targetWord, guess) {
+  const synonyms = await getSynonyms(targetWord);
+  return synonyms.includes(guess.toLowerCase());
+}
+
+// Define word categories
 const wordCategories = {
   verbs: ['run', 'jump', 'eat', 'sleep', 'write'],
   nouns: ['apple', 'car', 'house', 'tree', 'book'],
   easy: ['sun', 'moon', 'star', 'dog', 'cat'],
-  hard: ['elephant', 'ocean', 'mountain', 'universe', 'galaxy']
+  hard: ['elephant', 'ocean', 'mountain', 'universe', 'galaxy'],
 };
 
-// Handle category selection from the drawer
-io.on('connection', function(socket){
-  socket.on('categorySelection', function(category) {
-    // Get a random word from the selected category
+let currentWord = '';
+
+io.on('connection', function (socket) {
+  socket.on('categorySelection', async function (category) {
     const words = wordCategories[category];
     const randomIndex = Math.floor(Math.random() * words.length);
-    const randomWord = words[randomIndex];
-    console.log("Received word:", randomWord);
-    // Emit the randomly selected word to the drawer
-    io.emit('wordSelection', randomWord);
+    currentWord = words[randomIndex];
+    console.log('Selected word:', currentWord);
+
+    // Log all synonyms to the console
+    const synonyms = await getSynonyms(currentWord);
+    console.log('Synonyms:', synonyms);
+
+    io.emit('wordSelection', currentWord);
   });
-});
-
-io.on('connection', function(socket){
-
-  
 
   socket.on('mdown', (obj) => {
     socket.broadcast.emit('mdown', obj);
@@ -48,48 +85,52 @@ io.on('connection', function(socket){
   socket.on('mmove', (obj) => {
     socket.broadcast.emit('mmove', obj);
   });
-      
+
   socket.on('image', (obj) => {
     socket.broadcast.emit('image', obj);
   });
 
-  socket.on('chat message', function(msg){
-    console.log("Received message:", msg);
-    io.emit('chat message', msg);
-    // if(msg) // synonym checking
-    // {
-    //   io.emit('chat message', "Your guess was close!");
-    // }
+  socket.on('chat message', async function (msg) {
+    let processedMessage = msg;
+    let feedback = '';
+
+    // Check for profanity
+    if (profanityFilter.exists(msg)) {
+      processedMessage = profanityFilter.censor(msg);
+    }
+
+    // Check if it's a correct guess or synonym
+    if (currentWord && msg.toLowerCase() === currentWord.toLowerCase()) {
+      feedback = 'Correct guess!';
+    } else if (currentWord && (await checkSynonym(currentWord, msg))) {
+      feedback = 'You guessed a synonym!';
+    } else {
+      feedback = 'Wrong guess!';
+    }
+
+    const finalMessage = `${processedMessage} (${feedback})`;
+    io.emit('chat message', finalMessage);
   });
 
-  // Broadcast stroke color changes to all clients
-  socket.on('colorChange', function(color){
-    console.log("Received color:", color);
+  socket.on('colorChange', function (color) {
+    console.log('Received color:', color);
     io.emit('colorChange', color);
   });
 
-  // Broadcast stroke width changes to all clients
-  socket.on('widthChange', function(width){
-    console.log("Received stroke:", width);
+  socket.on('widthChange', function (width) {
+    console.log('Received stroke:', width);
     io.emit('widthChange', width);
   });
 
-  // Broadcast eraser mode to all clients
-  socket.on('eraser', function(){
+  socket.on('eraser', function () {
     io.emit('eraser');
   });
 
-  socket.on('clearCanvas', function(){
+  socket.on('clearCanvas', function () {
     io.emit('clearCanvas');
+  });
 });
 
-  // socket.on('undoStroke', function(){
-  //     io.emit('undoStroke');
-  // });
-});
-
-
-
-http.listen(3000, function(){
+server.listen(3000, function () {
   console.log('listening on *:3000');
 });
