@@ -56,6 +56,32 @@
       font-size: 24px;
       color: white;
     }
+
+    .popup {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      background-color: white;
+      padding: 20px;
+      border: 2px solid black;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+      transform: translate(-50%, -50%);
+    }
+
+    .popup.show {
+      display: block;
+    }
+
+    .background-only {
+      background-color: #4C5FA2;
+    }
+
+    .background-only #canvas-container,
+    .background-only #toolbox {
+      display: none;
+    }
   </style>
 </head>
 
@@ -92,7 +118,13 @@
     </div>
     <div id="wordDisplay"></div>
     <div id="timer">45</div>
+
+    <div id="timeUpPopup" class="popup">
+      <p>Time is up!</p>
+      <p>Switching Sides...</p>
+    </div>
   </div>
+
   <script src="/socket.io/socket.io.js"></script>
   <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
   <script>
@@ -297,18 +329,20 @@
         window.location.reload(true);
       });
 
-      socket.on('switchRoles', function () {
-        window.location.href = '/display';
-      });
-
-      // Listen for the selected word from the server
-      socket.on('wordSelection', function(word) {
-          // Display the selected word to the drawer
-          $('#wordDisplay').text("Your word to draw is: " + word);
-        });
-
       socket.on('timer', (remaining) => {
         $('#timer').text(remaining);
+      });
+
+      socket.on('timeUp', function () {
+        $('#timeUpPopup').addClass('show');
+        $('#canvas-container, #toolbox').hide();
+        $('body').addClass('background-only');
+
+        setTimeout(function () {
+          $('#timeUpPopup').removeClass('show');
+          $('#canvas-container, #toolbox').show();
+          $('body').removeClass('background-only');
+        }, 3000);
       });
     });
   </script>

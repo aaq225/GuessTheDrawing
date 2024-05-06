@@ -18,7 +18,7 @@ let player2 = null;
 let currentWord = '';
 let canvasState = []; // Store the series of drawing events
 let timer = null;
-let remainingTime = 45; // Initial timer duration
+let remainingTime = 5; // Initial timer duration
 let currentColor = "#000000"; // Default color
 let currentWidth = 5; // Default stroke width
 
@@ -134,7 +134,7 @@ function startTimer(duration, callback) {
 function resetGame() {
   currentWord = '';
   canvasState = [];
-  remainingTime = 45; // Reset timer to initial value
+  remainingTime = 5; // Reset timer to initial value
 }
 
 // Handle socket connections
@@ -149,13 +149,13 @@ io.on('connection', function (socket) {
     console.log('Synonyms:', synonyms);
 
     io.emit('wordSelection', currentWord);
-    remainingTime = 45; // Reset timer duration
+    remainingTime = 5; // Reset timer duration
     io.emit('timer', remainingTime);
 
     clearInterval(timer);
-    startTimer(45, () => {
+    startTimer(5, () => {
       console.log("Time is up! (Switching turns in 3 seconds.)");
-      io.emit('chat message', "Time is up! (Switching turns in 3 seconds.)");
+      io.emit('timeUp');
       resetGame();
       setTimeout(() => {
         io.sockets.emit('switchRoles');
