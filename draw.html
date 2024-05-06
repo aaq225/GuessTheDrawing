@@ -4,6 +4,7 @@
 <head>
   <title>Drawer</title>
   <style>
+     
     body {
       font-family: Arial, sans-serif;
       background-color: #4C5FA2;
@@ -55,6 +56,13 @@
     #timer {
       font-size: 24px;
       color: white;
+      display: flex;
+      align-items: center; /* Align items vertically */
+    }
+
+    #timer img {
+      width: 30px; /* Adjust size of the clock image */
+      margin-right: 10px; /* Add some space between image and text */
     }
   </style>
 </head>
@@ -63,6 +71,10 @@
   <div id="container">
     <div id="canvas-container">
       <canvas id="myCanvas" width="800" height="800"></canvas>
+    </div>
+    <div id="timer">
+      <img src=images/clock_icon.png" alt="Clock Icon"> <!-- Add clock image -->
+      <span id="timeRemaining">45</span> seconds remaining <!-- Add label -->
     </div>
     <div id="toolbox">
       <label for="category">Category:</label>
@@ -91,7 +103,7 @@
       <button id="clear-button">Clear</button>
     </div>
     <div id="wordDisplay"></div>
-    <div id="timer">45</div>
+    <!-- <div id="timer">45</div> -->
   </div>
   <script src="/socket.io/socket.io.js"></script>
   <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
