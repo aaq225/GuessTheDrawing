@@ -91,7 +91,7 @@
       <button id="clear-button">Clear</button>
     </div>
     <div id="wordDisplay"></div>
-    <div id="timer"></div>
+    <div id="timer">45</div>
   </div>
   <script src="/socket.io/socket.io.js"></script>
   <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
@@ -253,10 +253,6 @@
       socket.on('switchRoles', function () {
         window.location.href = '/display';
       });
-    });
-
-    $(function () {
-      var socket = io();
 
       socket.on('mdown', (obj) => {
         let canvas = document.getElementById("myCanvas");
@@ -310,6 +306,10 @@
           // Display the selected word to the drawer
           $('#wordDisplay').text("Your word to draw is: " + word);
         });
+
+      socket.on('timer', (remaining) => {
+        $('#timer').text(remaining);
+      });
     });
   </script>
 </body>

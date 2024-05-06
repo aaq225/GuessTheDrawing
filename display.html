@@ -113,6 +113,7 @@
     <p>Switching Sides...</p>
   </div>
 
+  <div id="timer">45</div>
 
   <script src="/socket.io/socket.io.js"></script>
   <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
@@ -199,7 +200,6 @@
       }, 3000);
     });
 
-
     // Request the current game state
     socket.emit('requestState');
 
@@ -243,9 +243,12 @@
       $('#timer').text(state.timer);
     });
 
-
     socket.on('forceRefresh', () => {
       window.location.reload(true);
+    });
+
+    socket.on('timer', (remaining) => {
+      $('#timer').text(remaining);
     });
   </script>
 </body>
