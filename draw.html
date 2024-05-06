@@ -304,6 +304,12 @@
       socket.on('switchRoles', function () {
         window.location.href = '/display';
       });
+
+      // Listen for the selected word from the server
+      socket.on('wordSelection', function(word) {
+          // Display the selected word to the drawer
+          $('#wordDisplay').text("Your word to draw is: " + word);
+        });
     });
   </script>
 </body>
