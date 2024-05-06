@@ -1,32 +1,18 @@
 <!doctype html>
 <html>
-  <head>
-    <title>Guesser</title>
-    <style>
-    /* * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    } */
 
+<head>
+  <title>Guesser</title>
+  <style>
     body {
       font-family: Arial, sans-serif;
-      background-color:#4C5FA2;
+      background-color: #4C5FA2;
     }
 
     #container {
       display: flex;
       align-items: flex-start;
     }
-
-    /* canvas {
-     
-      border: 1px solid #ccc;
-      display: flex;
-      margin: 20px auto;
-      background-color: #ffffff;
-    } */
-
 
     #canvas-container {
       margin-right: 20px;
@@ -39,7 +25,8 @@
       margin: 20px;
       padding: 0;
       overflow-y: auto;
-      max-height: 800px; /* Limiting the height of the message list */
+      max-height: 800px;
+      /* Limiting the height of the message list */
     }
 
     #messages li {
@@ -77,102 +64,190 @@
       border-radius: 5px;
       cursor: pointer;
     }
-    </style>
-  </head>
-  <body>
-    <div id="container">
-      <div id="canvas-container">
-        <canvas id="myCanvas" width = "800" height = "800"></canvas>
-      </div>
-      <ul id="messages"></ul>
-      <form action="">
-        <input id="m" autocomplete="off" /><button>Send</button>
-      </form>
+
+    #timer {
+      font-size: 24px;
+      color: white;
+    }
+
+    .popup {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      background-color: white;
+      padding: 20px;
+      border: 2px solid black;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    }
+
+    .popup.show {
+      display: block;
+    }
+
+    .background-only {
+      background-color: #4C5FA2;
+    }
+
+    .background-only #canvas-container,
+    .background-only #toolbox {
+      display: none;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="container">
+    <div id="canvas-container">
+      <canvas id="myCanvas" width="800" height="800"></canvas>
     </div>
-    
+    <ul id="messages"></ul>
+    <form action="">
+      <input id="m" autocomplete="off" /><button>Send</button>
+    </form>
+  </div>
 
-    <script src="/socket.io/socket.io.js"></script>
-    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
-    <script>
-      let socket = io();
-      let canvas = document.getElementById("myCanvas");
-      let ctx = canvas.getContext("2d");
-      let obj = {};
-      let history = [];
+  <div id="popup" class="popup">
+    <p>Correct guess!</p>
+    <p>Switching Sides...</p>
+  </div>
 
-      // Initialize drawing properties
-      ctx.strokeStyle = "#000000";
-      ctx.lineWidth = 5;
 
-      let isDrawing = false;
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+  <script>
+    let socket = io();
+    let canvas = document.getElementById("myCanvas");
+    let ctx = canvas.getContext("2d");
+    let obj = {};
 
-      socket.on("mdown", (obj) => {
-        ctx.beginPath();
-        ctx.moveTo(obj.x, obj.y);
-      
+    // Initialize drawing properties
+    ctx.strokeStyle = "#000000";
+    ctx.lineWidth = 5;
+
+    let isDrawing = false;
+
+    socket.on("mdown", (obj) => {
+      ctx.beginPath();
+      ctx.moveTo(obj.x, obj.y);
+    });
+
+    socket.on("mmove", (obj) => {
+      ctx.lineTo(obj.x, obj.y);
+      ctx.stroke();
+    });
+
+    socket.on('image', (obj) => {
+      let img = new Image();
+      img.src = obj.img;
+      ctx.drawImage(img, obj.x, obj.y);
+    });
+
+    // Listen for color change event from draw.html
+    socket.on('colorChange', function (color) {
+      ctx.strokeStyle = color; // Update stroke color
+    });
+
+    // Listen for width change event from draw.html
+    socket.on('widthChange', function (width) {
+      ctx.lineWidth = width; // Update stroke width
+    });
+
+    // Listen for eraser event from draw.html
+    socket.on('eraser', function () {
+      ctx.strokeStyle = "#ffffff"; // Set color to white for erasing
+    });
+
+    socket.on('clearCanvas', function () {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    });
+
+    socket.on('chat message', function (msg) {
+      $('#messages').prepend($('<li>').text(msg));
+    });
+
+    $(function () {
+      $('form').submit(function (e) {
+        e.preventDefault(); // Prevents page reloading
+        socket.emit('chat message', $('#m').val());
+        $('#m').val('');
+        return false;
       });
+    });
 
-      socket.on("mmove", (obj) => {
-        ctx.lineTo(obj.x, obj.y);
-        ctx.stroke();
-      });
+    socket.on('switchRoles', function () {
+      window.location.href = '/draw';
+    });
 
-      socket.on('image', (obj) => {
-        let img = new Image();
-        img.src = obj.img
-        ctx.drawImage(img, obj.x, obj.y);
-      });
+    // Listen for the event from the server indicating a correct guess
+    socket.on('correctGuess', function () {
+      // Show the popup
+      $('#popup').addClass('show');
 
-      // Listen for color change event from draw.html
-      socket.on('colorChange', function(color) {
-        ctx.strokeStyle = color; // Update stroke color
-      });
+      // Hide the canvas, color palette, their containing divs, chatbox, and chat messages
+      $('#canvas-container, #toolbox, #messages, form').hide();
 
-      // Listen for width change event from draw.html
-      socket.on('widthChange', function(width) {
-        ctx.lineWidth = width; // Update stroke width
-      });
+      // Hide the background color by adding a class to the body
+      $('body').addClass('background-only');
 
-      // Listen for eraser event from draw.html
-      socket.on('eraser', function() {
-        ctx.strokeStyle = "#ffffff"; // Set color to white for erasing
-      });
-      
-      socket.on('clearCanvas', function() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-      });
+      // Hide the background color and restore canvas, color palette, their containing divs, chatbox, and chat messages after 3 seconds
+      setTimeout(function () {
+        $('#popup').removeClass('show');
+        $('#canvas-container, #toolbox, #messages, form').show();
+        $('body').removeClass('background-only');
+      }, 3000);
+    });
 
-      // socket.on('undoStroke', function() {
-      //   let ctx = canvas.getContext("2d");
-      //   ctx.clearRect(0, 0, canvas.width, canvas.height);
-      //   if (history.length > 0) {
-      //       ctx.putImageData(history.pop(), 0, 0);
-      //   }
-      // });
 
-      socket.on('chat message', function(msg){
-        $('#messages').prepend($('<li>').text(msg));
-      });
+    // Request the current game state
+    socket.emit('requestState');
 
-      $(function () {
-        $('form').submit(function(e){
-          e.preventDefault(); // prevents page reloading
-          socket.emit('chat message', $('#m').val());
-          $('#m').val('');
-          return false;
-        });
-      });
+    // Restore the canvas, color, and timer
+    socket.on('restoreState', function (state) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      socket.on('switchRoles', function() {
-          window.location.href = '/draw';
-      });
-      
-      $(document).ready(() => {
-        const username = localStorage.getItem('username');
-        if (username) {
-            $.post('/homepage', { username });
+      // Redraw all canvas events
+      state.canvas.forEach(event => {
+        switch (event.type) {
+          case 'mdown':
+            ctx.beginPath();
+            ctx.moveTo(event.data.x, event.data.y);
+            break;
+          case 'mmove':
+            ctx.lineTo(event.data.x, event.data.y);
+            ctx.stroke();
+            break;
+          case 'image':
+            let img = new Image();
+            img.src = event.data.img;
+            img.onload = () => ctx.drawImage(img, event.data.x, event.data.y);
+            break;
+          case 'colorChange':
+            ctx.strokeStyle = event.data;
+            break;
+          case 'widthChange':
+            ctx.lineWidth = event.data;
+            break;
+          case 'eraser':
+            ctx.strokeStyle = "#ffffff";
+            break;
         }
       });
-    </script>
-  </body>
+
+      // Restore color and stroke width
+      ctx.strokeStyle = state.color;
+      ctx.lineWidth = state.width;
+
+      // Update timer
+      $('#timer').text(state.timer);
+    });
+
+
+    socket.on('forceRefresh', () => {
+      window.location.reload(true);
+    });
+  </script>
+</body>
+
 </html>

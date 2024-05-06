@@ -1,28 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Guess the Drawing</title>
     <style>
         body {
-            background-color:#4C5FA2;
+            background-color: #4C5FA2;
             font-family: Arial, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            margin: 0;  
+            margin: 0;
         }
 
         .container {
             text-align: center;
         }
-        /* h1 {
-            font-size: 36px;
-            margin-bottom: 10px;
-            color: #386a9c;
-        } */
 
         #usernameForm {
             display: inline-block;
@@ -60,9 +56,10 @@
         }
     </style>
 </head>
+
 <body>
     <div class="container">
-        <img class = "logo" src="images/logo.png" width = 400, alt="Game Logo">
+        <img class="logo" src="images/logo.png" width=400, alt="Game Logo">
         <h1></h1>
         <form id="usernameForm">
             <label for="username">Enter your username:</label><br>
@@ -72,8 +69,15 @@
     </div>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
     <script>
         $(document).ready(() => {
+            const socket = io();
+
+            socket.on('forceRefresh', () => {
+                window.location.reload(true);
+            });
+
             $('#usernameForm').submit((event) => {
                 event.preventDefault();
                 const username = $('#username').val().trim();
@@ -86,4 +90,5 @@
         });
     </script>
 </body>
+
 </html>
