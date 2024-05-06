@@ -110,8 +110,8 @@
       <canvas id="myCanvas" width="800" height="800"></canvas>
     </div>
     <div id="timer">
-      <img src="imgaes/clock_icon.png" alt="Clock Icon"> <!-- Add clock image -->
-      <span id="timeRemaining">45</span> seconds remaining <!-- Add label -->
+      <img src="images/clock_icon.png" alt="Clock Icon">
+      <p><span id="timeRemaining">45</span> seconds remaining</p>
     </div>
     <ul id="messages"></ul>
     <form action="">
@@ -128,8 +128,6 @@
     <p>Time is up!</p>
     <p>Switching Sides...</p>
   </div>
-
-  <div id="timer">45</div>
 
   <script src="/socket.io/socket.io.js"></script>
   <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
@@ -256,15 +254,16 @@
       ctx.lineWidth = state.width;
 
       // Update timer
-      $('#timer').text(state.timer);
+      $('#timeRemaining').text(state.timer);
     });
 
     socket.on('forceRefresh', () => {
       window.location.reload(true);
     });
 
+    // Update only the text of the timer
     socket.on('timer', (remaining) => {
-      $('#timer').text(remaining);
+      $('#timeRemaining').text(remaining);
     });
 
     socket.on('timeUp', function () {
