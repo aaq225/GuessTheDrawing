@@ -101,6 +101,11 @@
       width: 30px; /* Adjust size of the clock image */
       margin-right: 10px; /* Add some space between image and text */
     }
+
+    #score {
+      font-size: 24px;
+      color: rgb(0, 0, 0);
+    }
   </style>
 </head>
 
@@ -129,6 +134,8 @@
     <p>Switching Sides...</p>
   </div>
 
+  <div id="score">0</div>
+
   <script src="/socket.io/socket.io.js"></script>
   <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
   <script>
@@ -153,11 +160,11 @@
       ctx.stroke();
     });
 
-    socket.on('image', (obj) => {
-      let img = new Image();
-      img.src = obj.img;
-      ctx.drawImage(img, obj.x, obj.y);
-    });
+    // socket.on('image', (obj) => {
+    //   let img = new Image();
+    //   img.src = obj.img;
+    //   ctx.drawImage(img, obj.x, obj.y);
+    // });
 
     // Listen for color change event from draw.html
     socket.on('colorChange', function (color) {
@@ -232,11 +239,11 @@
             ctx.lineTo(event.data.x, event.data.y);
             ctx.stroke();
             break;
-          case 'image':
-            let img = new Image();
-            img.src = event.data.img;
-            img.onload = () => ctx.drawImage(img, event.data.x, event.data.y);
-            break;
+          // case 'image':
+          //   let img = new Image();
+          //   img.src = event.data.img;
+          //   img.onload = () => ctx.drawImage(img, event.data.x, event.data.y);
+          //   break;
           case 'colorChange':
             ctx.strokeStyle = event.data;
             break;
@@ -255,6 +262,11 @@
 
       // Update timer
       $('#timeRemaining').text(state.timer);
+      if (state.score) {
+        $('#score').text(state.score);
+      } else {
+        $('#score').text("0");
+      }
     });
 
     socket.on('forceRefresh', () => {
@@ -265,6 +277,10 @@
     socket.on('timer', (remaining) => {
       $('#timeRemaining').text(remaining);
     });
+
+    socket.on('score', (score) => {
+        $('#score').text(score);
+      });
 
     socket.on('timeUp', function () {
       $('#timeUpPopup').addClass('show');

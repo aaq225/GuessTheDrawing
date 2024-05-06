@@ -18,9 +18,11 @@ let player2 = null;
 let currentWord = '';
 let canvasState = []; // Store the series of drawing events
 let timer = null;
-let remainingTime = 5; // Initial timer duration
+let remainingTime = 12; // Initial timer duration
 let currentColor = "#000000"; // Default color
-let currentWidth = 5; // Default stroke width
+let currentWidth = 12; // Default stroke width
+let currentScore = 0;
+
 
 app.get('/homepage', function (req, res) {
   res.sendFile(path.join(__dirname, 'index.html'));
@@ -134,7 +136,7 @@ function startTimer(duration, callback) {
 function resetGame() {
   currentWord = '';
   canvasState = [];
-  remainingTime = 5; // Reset timer to initial value
+  remainingTime = 12; // Reset timer to initial value
 }
 
 // Handle socket connections
@@ -149,11 +151,11 @@ io.on('connection', function (socket) {
     console.log('Synonyms:', synonyms);
 
     io.emit('wordSelection', currentWord);
-    remainingTime = 5; // Reset timer duration
+    remainingTime = 12; // Reset timer duration
     io.emit('timer', remainingTime);
 
     clearInterval(timer);
-    startTimer(5, () => {
+    startTimer(12, () => {
       console.log("Time is up! (Switching turns in 3 seconds.)");
       io.emit('timeUp');
       resetGame();
@@ -171,11 +173,6 @@ io.on('connection', function (socket) {
   socket.on('mmove', (obj) => {
     canvasState.push({ type: 'mmove', data: obj });
     socket.broadcast.emit('mmove', obj);
-  });
-
-  socket.on('image', (obj) => {
-    canvasState.push({ type: 'image', data: obj });
-    socket.broadcast.emit('image', obj);
   });
 
   socket.on('colorChange', function (color) {
@@ -212,6 +209,9 @@ io.on('connection', function (socket) {
     // Check if it's a correct guess or synonym
     if (currentWord && msg.toLowerCase() === currentWord.toLowerCase()) {
       feedback = 'Correct guess! (Switching turns in 3 seconds.)';
+      currentScore += remainingTime;
+      console.log('score: ', currentScore);
+      io.emit('score', currentScore);
       io.emit('correctGuess');
       clearInterval(timer);
       resetGame();
@@ -241,7 +241,8 @@ io.on('connection', function (socket) {
       word: currentWord,
       timer: remainingTime,
       color: currentColor,
-      width: currentWidth
+      width: currentWidth,
+      score: currentScore
     });
   });
 
@@ -251,6 +252,9 @@ io.on('connection', function (socket) {
   });
 });
 
+// copied from: https://www.tutorialspoint.com/levenshtein-distance-in-javascript#:~:text=The%20Levenshtein%20distance%20is%20a,one%20word%20into%20the%20other.
+// allows me to detect if two words are close, ie. cat vs cap have 1 letter diff
+// it will detect that and display to the user
 const levenshteinDistance = (str1 = '', str2 = '') => {
   const track = Array(str2.length + 1).fill(null).map(() =>
     Array(str1.length + 1).fill(null));
@@ -274,5 +278,5 @@ const levenshteinDistance = (str1 = '', str2 = '') => {
 };
 
 server.listen(3000, function () {
-  console.log('listening on *:3000');
+  console.log('listening on port 3000');
 });

@@ -56,12 +56,15 @@
       font-size: 24px;
       color: white;
       display: flex;
-      align-items: center; /* Align items vertically */
+      align-items: center;
+      /* Align items vertically */
     }
 
     #timer img {
-      width: 30px; /* Adjust size of the clock image */
-      margin-right: 10px; /* Add some space between image and text */
+      width: 30px;
+      /* Adjust size of the clock image */
+      margin-right: 10px;
+      /* Add some space between image and text */
     }
 
     .popup {
@@ -88,6 +91,10 @@
     .background-only #canvas-container,
     .background-only #toolbox {
       display: none;
+    }
+    #score {
+      font-size: 24px;
+      color: rgb(0, 0, 0);
     }
   </style>
 </head>
@@ -128,6 +135,8 @@
       <button id="clear-button">Clear</button>
     </div>
     <div id="wordDisplay"></div>
+    <div id="score">0</div>
+    
 
     <div id="timeUpPopup" class="popup">
       <p>Time is up!</p>
@@ -209,36 +218,36 @@
         isDrawing = false;
       });
 
-      canvas.addEventListener('dragover', (e) => {
-        e.stopPropagation();
-        e.preventDefault();
-        e.dataTransfer.dropEffect = 'copy';
-      });
+      // canvas.addEventListener('dragover', (e) => {
+      //   e.stopPropagation();
+      //   e.preventDefault();
+      //   e.dataTransfer.dropEffect = 'copy';
+      // });
 
-      canvas.addEventListener('drop', (e) => {
-        e.stopPropagation();
-        e.preventDefault();
-        var files = e.dataTransfer.files; // Array of all files
+      // canvas.addEventListener('drop', (e) => {
+      //   e.stopPropagation();
+      //   e.preventDefault();
+      //   var files = e.dataTransfer.files; // Array of all files
 
-        for (var i = 0, file; file = files[i]; i++) {
-          if (file.type.match(/image.*/)) {
-            var reader = new FileReader();
+      //   for (var i = 0, file; file = files[i]; i++) {
+      //     if (file.type.match(/image.*/)) {
+      //       var reader = new FileReader();
 
-            reader.onload = function (e2) {
-              var img = document.createElement('img');
-              img.src = e2.target.result;
-              ctx.drawImage(img, e.offsetX, e.offsetY);
-              let obj = {};
-              obj.x = e.offsetX;
-              obj.y = e.offsetY;
-              obj.img = img.src;
-              socket.emit("image", obj);
-            }
+      //       reader.onload = function (e2) {
+      //         var img = document.createElement('img');
+      //         img.src = e2.target.result;
+      //         ctx.drawImage(img, e.offsetX, e.offsetY);
+      //         let obj = {};
+      //         obj.x = e.offsetX;
+      //         obj.y = e.offsetY;
+      //         obj.img = img.src;
+      //         socket.emit("image", obj);
+      //       }
 
-            reader.readAsDataURL(file); // Start reading the file data
-          }
-        }
-      });
+      //       reader.readAsDataURL(file); // Start reading the file data
+      //     }
+      //   }
+      // });
 
       // Request the current game state
       socket.emit('requestState');
@@ -258,11 +267,11 @@
               ctx.lineTo(event.data.x, event.data.y);
               ctx.stroke();
               break;
-            case 'image':
-              let img = new Image();
-              img.src = event.data.img;
-              img.onload = () => ctx.drawImage(img, event.data.x, event.data.y);
-              break;
+            // case 'image':
+            //   let img = new Image();
+            //   img.src = event.data.img;
+            //   img.onload = () => ctx.drawImage(img, event.data.x, event.data.y);
+            //   break;
             case 'colorChange':
               ctx.strokeStyle = event.data;
               break;
@@ -290,11 +299,21 @@
         } else {
           $('#wordDisplay').text("");
         }
+
+        if (state.score) {
+          $('#score').text(state.score);
+        } else {
+          $('#score').text("0");
+        }
       });
 
       socket.on('switchRoles', function () {
         window.location.href = '/display';
       });
+    });
+
+    $(function () {
+      var socket = io();
 
       socket.on('mdown', (obj) => {
         let canvas = document.getElementById("myCanvas");
@@ -310,13 +329,13 @@
         ctx.stroke();
       });
 
-      socket.on('image', (obj) => {
-        let canvas = document.getElementById("myCanvas");
-        let ctx = canvas.getContext("2d");
-        let img = new Image();
-        img.src = obj.img;
-        ctx.drawImage(img, obj.x, obj.y);
-      });
+      // socket.on('image', (obj) => {
+      //   let canvas = document.getElementById("myCanvas");
+      //   let ctx = canvas.getContext("2d");
+      //   let img = new Image();
+      //   img.src = obj.img;
+      //   ctx.drawImage(img, obj.x, obj.y);
+      // });
 
       socket.on('colorChange', function (color) {
         ctx.strokeStyle = color; // Update stroke color
@@ -325,6 +344,10 @@
       socket.on('widthChange', function (width) {
         ctx.lineWidth = width; // Update stroke width
         $('#strokeWidth').val(width);
+      });
+
+      socket.on('wordSelection', function(word) {
+        $('#wordDisplay').text("Your word to draw is: " + word);
       });
 
       socket.on('eraser', function () {
@@ -354,6 +377,10 @@
           $('#canvas-container, #toolbox').show();
           $('body').removeClass('background-only');
         }, 3000);
+      });
+
+      socket.on('score', (score) => {
+        $('#score').text(score);
       });
     });
   </script>
