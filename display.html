@@ -176,6 +176,10 @@
       ctx.lineWidth = width; // Update stroke width
     });
 
+    socket.on('wordSelection', function() {
+      $('#messages').prepend($('<li>').text("Game start!"));
+    });
+
     // Listen for eraser event from draw.html
     socket.on('eraser', function () {
       ctx.strokeStyle = "#ffffff"; // Set color to white for erasing
