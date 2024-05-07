@@ -23,9 +23,13 @@
     #toolbox {
       width: 200px;
       padding: 10px;
-      background-color: #f0f0f0;
+      background-color: #e7e1e1e8;
       border-radius: 5px;
-      box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+      margin-top: 20px;
+      font-size: larger;
+      font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    
     }
 
     #toolbox label {
@@ -50,21 +54,6 @@
       border: none;
       border-radius: 5px;
       cursor: pointer;
-    }
-
-    #timer {
-      font-size: 24px;
-      color: white;
-      display: flex;
-      align-items: center;
-      /* Align items vertically */
-    }
-
-    #timer img {
-      width: 30px;
-      /* Adjust size of the clock image */
-      margin-right: 10px;
-      /* Add some space between image and text */
     }
 
     .popup {
@@ -93,14 +82,38 @@
       display: none;
     }
 
-    #score {
-      font-size: 24px;
-      color: rgb(0, 0, 0);
+    #info-box {
+      background-color: #BD9696;
+      border-radius: 5px;
+      padding: 10px;
+      margin-top: 20px;
+      margin-left: 20px;
+      display: flex;
+      justify-content: space-between;
+      box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+      font-size: larger;
+      font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+      color: #fff;
     }
 
-    #round {
-      font-size: 24px;
-      color: rgb(255, 0, 0);
+    .info-item {
+      margin-right: 20px;
+    }
+    /* timer */
+    .info-item img {
+      width: 30px;
+    }
+
+
+    .info-item label {
+      font-weight: bold;
+      font-size: larger;
+    }
+
+    #header {
+      margin-bottom: 20px;
+      font-size: 18px;
+      font-weight: bold;
     }
   </style>
 </head>
@@ -109,10 +122,6 @@
   <div id="container">
     <div id="canvas-container">
       <canvas id="myCanvas" width="800" height="800"></canvas>
-    </div>
-    <div id="timer">
-      <img src="images/clock_icon.png" alt="Clock Icon">
-      <p><span id="timeRemaining">45</span> seconds remaining</p> <!--REMEMBER TO CHANGE NUMBER?!-->
     </div>
     <div id="toolbox">
       <label for="category">Category:</label>
@@ -140,11 +149,23 @@
       <button id="eraser">Eraser</button>
       <button id="clear-button">Clear</button>
     </div>
+    <div id="info-box">
+      <div class="info-item">
+        <img src="images/clock_icon.png" alt="Clock Icon">
+        <!-- <label for="timer">Timer:</label> -->
+        <span id="timeRemaining">45</span> seconds remaining
+      </div>
+      <div class="info-item">
+        <label for="score">Score:</label>
+        <span id="score">0</span>
+      </div>
+      <div class="info-item">
+        <label for="round">Round:</label>
+        <span id="round">1</span>
+      </div>
+    </div>
     <div id="wordDisplay"></div>
-    <div id="score">0</div>
-    <div id="round">1</div>
     
-
     <div id="timeUpPopup" class="popup">
       <p>Time is up!</p>
       <p>Switching Sides...</p>
