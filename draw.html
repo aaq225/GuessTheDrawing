@@ -323,6 +323,10 @@
       socket.on('switchRoles', function () {
         window.location.href = '/display';
       });
+
+      socket.on('reset', function () {
+        window.location.href = '/homepage';
+      });
     });
 
     $(function () {

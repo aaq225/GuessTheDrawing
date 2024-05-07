@@ -18,7 +18,7 @@ let player2 = null;
 let currentWord = '';
 let canvasState = []; // Store the series of drawing events
 let timer = null;
-let remainingTime = 12; // Initial timer duration
+let remainingTime = 45; // Initial timer duration
 let currentColor = "#000000"; // Default color
 let currentWidth = 12; // Default stroke width
 let currentScore = 0;
@@ -31,12 +31,14 @@ app.get('/homepage', function (req, res) {
 
 app.post('/homepage', function (req, res) {
   const { username } = req.body;
-  if (!player1) {
+  if (player1 == null) {
     player1 = username;
+    console.log("player 1: ", player1);
     res.json({ redirectUrl: '/draw' });
     io.emit('forceRefresh');
-  } else if (!player2) {
+  } else if (player2 == null) {
     player2 = username;
+    console.log("player 2: ", player2);
     res.json({ redirectUrl: '/display' });
     io.emit('forceRefresh');
   } else {
@@ -49,10 +51,12 @@ app.get('/', function (req, res) {
 });
 
 app.get('/draw', function (req, res) {
-  if (!player1) {
+  if (player1 == null) {
     // Redirect to homepage if no players are logged in
+    console.log("player 1 is null");
     res.redirect('/homepage');
-  } else if (!player2) {
+  } else if (player2 == null) {
+    console.log("player 2 is null");
     // Redirect to waiting page if only one player is logged in
     res.sendFile(path.join(__dirname, 'waitingPage.html'));
   } else {
@@ -62,7 +66,9 @@ app.get('/draw', function (req, res) {
 });
 
 app.get('/display', function (req, res) {
-  if (!player1 || !player2) {
+  if (player1 == null|| player2 == null) {
+    console.log("player 1: ", player1);
+    console.log("player 2: ", player2);
     // Redirect to homepage if both players are not logged in
     res.redirect('/homepage');
   } else {
@@ -71,11 +77,11 @@ app.get('/display', function (req, res) {
   }
 });
 
-app.get('/reset', (req, res) => {
-  player1 = null;
-  player2 = null;
-  res.redirect('/');
-});
+// app.get('/reset', (req, res) => {
+//   player1 = null;
+//   player2 = null;
+//   res.redirect('/');
+// });
 
 const options = new ProfanityOptions();
 options.wholeWord = true; // Adjust options as necessary
@@ -137,34 +143,50 @@ function startTimer(duration, callback) {
 function resetGame() {
   currentWord = '';
   canvasState = [];
-  remainingTime = 12; // Reset timer to initial value
+  remainingTime = 45; // Reset timer to initial value
+  if(currentRound == 4)
+  {
+    currentRound = 0;
+    currentScore = 0;
+    console.log("Game Over!");
+    io.emit('chat message', "Game Over!");
+    player1 = null;
+    player2 = null;
+    setTimeout(() => {
+      // res.redirect('/reset');
+      io.emit('reset');
+    }, 2500);
+  }
   currentRound += 1;
 }
 
 // Handle socket connections
 io.on('connection', function (socket) {
   socket.on('categorySelection', async function (category) {
-    const words = wordCategories[category];
-    const randomIndex = Math.floor(Math.random() * words.length);
-    currentWord = words[randomIndex];
-    console.log('Selected word:', currentWord);
+    if(currentWord == '')
+    {
+      const words = wordCategories[category];
+      const randomIndex = Math.floor(Math.random() * words.length);
+      currentWord = words[randomIndex];
+      console.log('Selected word:', currentWord);
 
-    const synonyms = await getSynonyms(currentWord);
-    console.log('Synonyms:', synonyms);
+      const synonyms = await getSynonyms(currentWord);
+      console.log('Synonyms:', synonyms);
 
-    io.emit('wordSelection', currentWord);
-    remainingTime = 12; // Reset timer duration
-    io.emit('timer', remainingTime);
+      io.emit('wordSelection', currentWord);
+      remainingTime = 45; // Reset timer duration
+      io.emit('timer', remainingTime);
 
-    clearInterval(timer);
-    startTimer(12, () => {
-      console.log("Time is up! (Switching turns in 3 seconds.)");
-      io.emit('timeUp');
-      resetGame();
-      setTimeout(() => {
-        io.sockets.emit('switchRoles');
-      }, 3000);
-    });
+      clearInterval(timer);
+      startTimer(45, () => {
+        console.log("Time is up! (Switching turns in 3 seconds.)");
+        io.emit('timeUp');
+        resetGame();
+        setTimeout(() => {
+          io.sockets.emit('switchRoles');
+        }, 3000);
+      });
+    }
   });
 
   socket.on('mdown', (obj) => {
@@ -218,6 +240,7 @@ io.on('connection', function (socket) {
       clearInterval(timer);
       resetGame();
       setTimeout(() => {
+        console.log("switchRoles");
         io.sockets.emit('switchRoles');
       }, 3000);
     } else if (currentWord && (await checkSynonym(currentWord, msg))) {
@@ -251,7 +274,10 @@ io.on('connection', function (socket) {
 
   // Force refresh clients
   socket.on('forceRefresh', () => {
-    socket.emit('forceRefresh');
+    // socket.emit('forceRefresh');
+    if (window.location.pathname === '/homepage') {
+      window.location.reload();
+    }
   });
 });
 

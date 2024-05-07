@@ -212,6 +212,10 @@
       window.location.href = '/draw';
     });
 
+    socket.on('reset', function () {
+      window.location.href = '/homepage';
+    });
+
     // Listen for the event from the server indicating a correct guess
     socket.on('correctGuess', function () {
       // Show the popup
