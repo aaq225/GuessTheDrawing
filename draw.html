@@ -29,7 +29,7 @@
       margin-top: 20px;
       font-size: larger;
       font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
-    
+
     }
 
     #toolbox label {
@@ -89,22 +89,30 @@
       margin-left: 20px;
       display: flex;
       justify-content: space-between;
+      flex-direction: column;
       box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
       font-size: larger;
-      font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+      font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', 'Geneva', Verdana, sans-serif;
       color: #fff;
+      align-items: center;
+      text-align: center;
+      height: 306.876px;
     }
 
     .info-item {
-      margin-right: 20px;
+      margin-right: 10px;
+      margin-left: 10px;
     }
+
     /* timer */
     .info-item img {
-      width: 30px;
+      width: 50px;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
     }
 
-
-    .info-item label {
+    .info-item label, p {
       font-weight: bold;
       font-size: larger;
     }
@@ -152,22 +160,20 @@
       <div class="info-item">
         <img src="images/clock_icon.png" alt="Clock Icon">
         <!-- <label for="timer">Timer:</label> -->
-        <span id="timeRemaining">45</span> seconds remaining
+        <p><span id="timeRemaining">45</span> seconds remaining</p>
       </div>
       <div class="info-item">
-        <label for="score">Score:</label>
-        <span id="score">0</span>
+        <label for="score">Score: <span id="score">0</span></label>
       </div>
       <div class="info-item">
-        <label for="round">Round:</label>
-        <span id="round">1</span>
+        <label for="round">Round: <span id="round">1</span></label>
       </div>
       <div class="info-item">
-        <span id="wordDisplay"></span>
+        <label for="word-txt"><span id="wordDisplay"></span></label>
       </div>
     </div>
-   
-    
+
+
     <div id="timeUpPopup" class="popup">
       <p>Time is up!</p>
       <p>Switching Sides...</p>
@@ -331,7 +337,7 @@
 
         // Update word display
         if (state.word) {
-          $('#wordDisplay').text("Your word to draw is: " + state.word);
+          $('#wordDisplay').text("Word to draw: " + state.word);
         } else {
           $('#wordDisplay').text("");
         }
@@ -393,7 +399,7 @@
       });
 
       socket.on('wordSelection', function(word) {
-        $('#wordDisplay').text("Your word to draw is: " + word);
+        $('#wordDisplay').text("Word to draw: " + word);
       });
 
       socket.on('eraser', function () {
@@ -415,7 +421,7 @@
 
       socket.on('timeUp', function () {
         $('#timeUpPopup').addClass('show');
-        $('#canvas-container, #toolbox').hide();
+        $('#canvas-container, #toolbox, #info-box').hide();
         $('body').addClass('background-only');
 
         setTimeout(function () {
