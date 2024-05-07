@@ -71,7 +71,7 @@ app.get('/draw', function (req, res) {
 });
 
 app.get('/display', function (req, res) {
-  if (player1 == null|| player2 == null) {
+  if (player1 == null || player2 == null) {
     console.log("player 1: ", player1);
     console.log("player 2: ", player2);
     // Redirect to homepage if both players are not logged in
@@ -150,8 +150,7 @@ function resetGame() {
   currentWord = '';
   canvasState = [];
   remainingTime = 45; // Reset timer to initial value
-  if(currentRound == 4)
-  {
+  if (currentRound == 4) {
     currentRound = 0;
     currentScore = 0;
     console.log("Game Over!");
@@ -169,8 +168,7 @@ function resetGame() {
 // Handle socket connections
 io.on('connection', function (socket) {
   socket.on('categorySelection', async function (category) {
-    if(currentWord == '')
-    {
+    if (currentWord == '') {
       const words = wordCategories[category];
       const randomIndex = Math.floor(Math.random() * words.length);
       currentWord = words[randomIndex];
@@ -228,42 +226,47 @@ io.on('connection', function (socket) {
   });
 
   socket.on('chat message', async function (msg) {
-    let processedMessage = msg;
-    let feedback = '';
+    // Trim and ensure the message isn't empty or consists only of whitespace
+    if (msg && msg.trim()) {
+      let processedMessage = msg.trim();
+      let feedback = '';
 
-    // Check for profanity
-    if (profanityFilter.exists(msg)) {
-      processedMessage = profanityFilter.censor(msg);
-    }
-
-    // Check if it's a correct guess or synonym
-    if (currentWord && msg.toLowerCase() === currentWord.toLowerCase()) {
-      feedback = 'Correct guess! (Switching turns in 3 seconds.)';
-      currentScore += remainingTime;
-      console.log('score: ', currentScore);
-      io.emit('score', currentScore);
-      io.emit('correctGuess');
-      clearInterval(timer);
-      resetGame();
-      setTimeout(() => {
-        console.log("switchRoles");
-        io.sockets.emit('switchRoles');
-      }, 3000);
-    } else if (currentWord && (await checkSynonym(currentWord, msg))) {
-      feedback = 'You guessed a synonym!';
-    } else if (currentWord) {
-      const distance = levenshteinDistance(currentWord.toLowerCase(), msg.toLowerCase());
-      const isClose = distance <= Math.ceil(currentWord.length / 3);
-      if (isClose) {
-        feedback = 'Your guess is close!';
-      } else {
-        feedback = 'Wrong guess!';
+      // Check for profanity
+      if (profanityFilter.exists(processedMessage)) {
+        processedMessage = profanityFilter.censor(processedMessage);
       }
-    }
 
-    const finalMessage = `${processedMessage} (${feedback})`;
-    io.emit('chat message', finalMessage);
+      // Check if it's a correct guess or synonym
+      if (currentWord && processedMessage.toLowerCase() === currentWord.toLowerCase()) {
+        feedback = 'Correct guess! (Switching turns in 3 seconds.)';
+        currentScore += remainingTime;
+        console.log('score: ', currentScore);
+        io.emit('score', currentScore);
+        io.emit('correctGuess');
+        clearInterval(timer);
+        resetGame();
+        setTimeout(() => {
+          console.log("switchRoles");
+          io.sockets.emit('switchRoles');
+        }, 3000);
+      } else if (currentWord && (await checkSynonym(currentWord, processedMessage))) {
+        feedback = 'You guessed a synonym!';
+      } else if (currentWord) {
+        const distance = levenshteinDistance(currentWord.toLowerCase(), processedMessage.toLowerCase());
+        const isClose = distance <= Math.ceil(currentWord.length / 3);
+        if (isClose) {
+          feedback = 'Your guess is close!';
+        } else {
+          feedback = 'Wrong guess!';
+        }
+      }
+
+      // Construct the final message with optional feedback
+      const finalMessage = feedback ? `${processedMessage} (${feedback})` : processedMessage;
+      io.emit('chat message', finalMessage);
+    }
   });
+
 
   // Provide the current game state upon request
   socket.on('requestState', function () {
