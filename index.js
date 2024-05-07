@@ -5,6 +5,7 @@ const socketio = require('socket.io');
 const axios = require('axios');
 const bodyParser = require('body-parser');
 const { Profanity, ProfanityOptions } = require('@2toad/profanity');
+const fs = require('fs');
 
 const app = express();
 const server = http.createServer(app);
@@ -24,6 +25,10 @@ let currentWidth = 12; // Default stroke width
 let currentScore = 0;
 let currentRound = 1;
 
+function readWords(filename) {
+  const filePath = path.join(__dirname, filename);
+  return fs.readFileSync(filePath, 'utf8').split('\n').map(word => word.trim());
+}
 
 app.get('/homepage', function (req, res) {
   res.sendFile(path.join(__dirname, 'index.html'));
@@ -115,13 +120,14 @@ async function checkSynonym(targetWord, guess) {
   return synonyms.includes(guess.toLowerCase());
 }
 
-// Define word categories
 const wordCategories = {
-  verbs: ['run', 'jump', 'eat', 'sleep', 'write'],
-  nouns: ['apple', 'car', 'house', 'tree', 'book'],
-  easy: ['sun', 'moon', 'star', 'dog', 'cat'],
-  hard: ['elephant', 'ocean', 'mountain', 'universe', 'galaxy'],
+  flags: readWords('flags.txt'),
+  animals: readWords('animals.txt'),
+  foods: readWords('foods.txt'),
+  objects: readWords('objects.txt'),
+  verbs: readWords('verbs.txt')
 };
+
 
 // Start the round timer
 function startTimer(duration, callback) {
