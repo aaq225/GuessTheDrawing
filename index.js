@@ -22,6 +22,7 @@ let remainingTime = 12; // Initial timer duration
 let currentColor = "#000000"; // Default color
 let currentWidth = 12; // Default stroke width
 let currentScore = 0;
+let currentRound = 1;
 
 
 app.get('/homepage', function (req, res) {
@@ -137,6 +138,7 @@ function resetGame() {
   currentWord = '';
   canvasState = [];
   remainingTime = 12; // Reset timer to initial value
+  currentRound += 1;
 }
 
 // Handle socket connections
@@ -242,7 +244,8 @@ io.on('connection', function (socket) {
       timer: remainingTime,
       color: currentColor,
       width: currentWidth,
-      score: currentScore
+      score: currentScore,
+      round: currentRound
     });
   });
 

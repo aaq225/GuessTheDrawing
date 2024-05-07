@@ -92,9 +92,15 @@
     .background-only #toolbox {
       display: none;
     }
+
     #score {
       font-size: 24px;
       color: rgb(0, 0, 0);
+    }
+
+    #round {
+      font-size: 24px;
+      color: rgb(255, 0, 0);
     }
   </style>
 </head>
@@ -136,6 +142,7 @@
     </div>
     <div id="wordDisplay"></div>
     <div id="score">0</div>
+    <div id="round">1</div>
     
 
     <div id="timeUpPopup" class="popup">
@@ -304,6 +311,12 @@
           $('#score').text(state.score);
         } else {
           $('#score').text("0");
+        }
+
+        if (state.round) {
+          $('#round').text(state.round);
+        } else {
+          $('#round').text("1");
         }
       });
 
