@@ -112,7 +112,8 @@
       margin-right: auto;
     }
 
-    .info-item label, p {
+    .info-item label,
+    p {
       font-weight: bold;
       font-size: larger;
     }
@@ -179,11 +180,15 @@
     <div id="timeUpPopup" class="popup">
       <p>Time is up!</p>
       <p>Switching Sides...</p>
+      <p>Score: <span id="popupScoreTimeUp">0</span></p>
+      <p>Round: <span id="popupRoundTimeUp">1</span></p>
     </div>
 
     <div id="popup" class="popup">
       <p>The guesser guessed correctly!</p>
       <p>Switching Sides...</p>
+      <p>Score: <span id="popupScoreCorrect">0</span></p>
+      <p>Round: <span id="popupRoundCorrect">1</span></p>
     </div>
 
   </div>
@@ -196,6 +201,8 @@
       let canvas = document.getElementById("myCanvas");
       let ctx = canvas.getContext("2d");
       let obj = {};
+      let currentScore = 0;
+      let currentRound = 1;
 
       // Initialize drawing properties
       ctx.strokeStyle = "#000000";
@@ -400,7 +407,7 @@
         $('#strokeWidth').val(width);
       });
 
-      socket.on('wordSelection', function(word) {
+      socket.on('wordSelection', function (word) {
         $('#wordDisplay').text("Word to draw: " + word);
       });
 
@@ -421,10 +428,23 @@
         $('#timeRemaining').text(remaining);
       });
 
+      socket.on('score', (score) => {
+        currentScore = score; // Update the currentScore variable
+        $('#score').text(score);
+      });
+
+      socket.on('round', (round) => {
+        currentRound = round; // Update the currentRound variable
+        $('#round').text(round);
+      });
+
       socket.on('timeUp', function () {
         $('#timeUpPopup').addClass('show');
         $('#canvas-container, #toolbox, #info-box').hide();
         $('body').addClass('background-only');
+        $('#popupScoreTimeUp').text(currentScore);
+        $('#popupRoundTimeUp').text(currentRound);
+
 
         setTimeout(function () {
           $('#timeUpPopup').removeClass('show');
@@ -437,6 +457,8 @@
         $('#popup').addClass('show');
         $('#canvas-container, #toolbox, #info-box, #wordDisplay').hide();
         $('body').addClass('background-only');
+        $('#popupScoreCorrect').text(currentScore);
+        $('#popupRoundCorrect').text(currentRound);
 
         setTimeout(function () {
           $('#popup').removeClass('show');

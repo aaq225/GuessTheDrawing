@@ -128,6 +128,10 @@ const wordCategories = {
   verbs: readWords('verbs.txt')
 };
 
+function updateScoreAndRound() {
+  io.emit('score', currentScore);
+  io.emit('round', currentRound);
+}
 
 // Start the round timer
 function startTimer(duration, callback) {
@@ -185,6 +189,7 @@ io.on('connection', function (socket) {
       startTimer(45, () => {
         console.log("Time is up! (Switching turns in 3 seconds.)");
         io.emit('timeUp');
+        updateScoreAndRound();
         resetGame();
         setTimeout(() => {
           io.sockets.emit('switchRoles');
@@ -241,6 +246,7 @@ io.on('connection', function (socket) {
         feedback = 'Correct guess! (Switching turns in 3 seconds.)';
         currentScore += remainingTime;
         console.log('score: ', currentScore);
+        updateScoreAndRound();
         io.emit('score', currentScore);
         io.emit('correctGuess');
         clearInterval(timer);
