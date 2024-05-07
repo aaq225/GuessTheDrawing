@@ -149,11 +149,11 @@ function startTimer(duration, callback) {
   }, 1000);
 }
 
-// Reset game state
+
 function resetGame() {
   currentWord = '';
   canvasState = [];
-  remainingTime = 45; // Reset timer to initial value
+  remainingTime = 45; 
   if (currentRound == 4) {
     currentRound = 0;
     currentScore = 0;
@@ -182,7 +182,7 @@ io.on('connection', function (socket) {
       console.log('Synonyms:', synonyms);
 
       io.emit('wordSelection', currentWord);
-      remainingTime = 45; // Reset timer duration
+      remainingTime = 45; 
       io.emit('timer', remainingTime);
 
       clearInterval(timer);
@@ -215,7 +215,7 @@ io.on('connection', function (socket) {
   });
 
   socket.on('widthChange', function (width) {
-    currentWidth = width; // Update current width
+    currentWidth = width; 
     canvasState.push({ type: 'widthChange', data: width });
     io.emit('widthChange', width);
   });
