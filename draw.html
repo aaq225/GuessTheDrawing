@@ -66,7 +66,6 @@
       border: 2px solid black;
       border-radius: 10px;
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-      transform: translate(-50%, -50%);
     }
 
     .popup.show {
@@ -170,6 +169,12 @@
       <p>Time is up!</p>
       <p>Switching Sides...</p>
     </div>
+
+    <div id="popup" class="popup">
+      <p>The guesser guessed correctly!</p>
+      <p>Switching Sides...</p>
+    </div>
+
   </div>
 
   <script src="/socket.io/socket.io.js"></script>
@@ -412,6 +417,18 @@
 
         setTimeout(function () {
           $('#timeUpPopup').removeClass('show');
+          $('#canvas-container, #toolbox').show();
+          $('body').removeClass('background-only');
+        }, 3000);
+      });
+
+      socket.on('correctGuess', function () {
+        $('#popup').addClass('show');
+        $('#canvas-container, #toolbox, #info-box, #wordDisplay').hide();
+        $('body').addClass('background-only');
+
+        setTimeout(function () {
+          $('#popup').removeClass('show');
           $('#canvas-container, #toolbox').show();
           $('body').removeClass('background-only');
         }, 3000);
