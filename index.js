@@ -22,6 +22,7 @@ At the end of each 45-second round, the guesser and drawer will "switch roles"
 the guesser is redirected to the drawing page, and vice versa. 
 
 At the end of 4 rounds, the overall score for the game is displayed, and both players are redirected to the homepage to play again.
+
 */
 
 const express = require('express');
