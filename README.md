@@ -8,8 +8,8 @@ npm install socket
 Game Instructions:
 Run with node index.js 
 
-Login with a username 
-Wait for the second player to login 
+Login with a username (index.html is the homepage)
+Wait for the second player to login (waitingPage.html)
 
 This game is a 2 player game 
 
@@ -26,6 +26,6 @@ The two players should work together to get the highest score possible within th
 This incentivizes the drawer to do their best with their drawing and the guesser to try their best to guess correctly. 
 
 At the end of each 45-second round, the guesser and drawer will "switch roles"
-the guesser is redirected to the drawing page, and vice versa. 
+the guesser is redirected to the drawing page (draw.html), and the drawer is redirected the to the guessing page (display.html). 
 
 At the end of 4 rounds, the overall score for the game is displayed, and both players are redirected to the homepage to play again.
