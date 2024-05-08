@@ -123,6 +123,37 @@
       font-size: 18px;
       font-weight: bold;
     }
+
+    #word-box {
+      width: 200px;
+      padding: 10px;
+      background-color: #e7e1e1e8;
+      border-radius: 5px;
+      box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+      margin-top: 20px;
+      margin-left: 20px;
+      font-size: larger;
+      font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    }
+
+    #word-box label {
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    #selectCategory {
+      margin-top: 5px;
+      padding: 5px 10px;
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    #category {
+      margin-top: 5px;
+    }
   </style>
 </head>
 
@@ -133,15 +164,6 @@
       <canvas id="myCanvas" width="800" height="800"></canvas>
     </div>
     <div id="toolbox">
-      <label for="category">Category:</label>
-      <select id="category">
-        <option value="animals">Animals</option>
-        <option value="foods">Foods</option>
-        <option value="objects">Objects</option>
-        <option value="flags">Country Flags</option>
-        <option value="verbs">Verbs</option>
-      </select>
-      <button id="selectCategory">Select Category</button>
       <div id="colorPalette">
         <label for="color-box">Color Palette:</label>
         <div class="color-box" style="background-color: black;"></div>
@@ -158,6 +180,17 @@
       <input type="range" id="strokeWidth" min="1" max="50" value="5">
       <button id="eraser">Eraser</button>
       <button id="clear-button">Clear</button>
+    </div>
+    <div id="word-box">
+      <label for="category">Category:</label>
+      <select id="category">
+        <option value="animals">Animals</option>
+        <option value="foods">Foods</option>
+        <option value="objects">Objects</option>
+        <option value="flags">Country Flags</option>
+        <option value="verbs">Verbs</option>
+      </select>
+      <button id="selectCategory">Select Category</button>
     </div>
     <div id="info-box">
       <div class="info-item">
@@ -196,10 +229,12 @@
   <script src="/socket.io/socket.io.js"></script>
   <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
   <script>
+
     $(() => {
       let socket = io();
       let canvas = document.getElementById("myCanvas");
       let ctx = canvas.getContext("2d");
+
       let obj = {};
       let currentScore = 0;
       let currentRound = 1;
@@ -269,37 +304,6 @@
         isDrawing = false;
       });
 
-      // canvas.addEventListener('dragover', (e) => {
-      //   e.stopPropagation();
-      //   e.preventDefault();
-      //   e.dataTransfer.dropEffect = 'copy';
-      // });
-
-      // canvas.addEventListener('drop', (e) => {
-      //   e.stopPropagation();
-      //   e.preventDefault();
-      //   var files = e.dataTransfer.files; // Array of all files
-
-      //   for (var i = 0, file; file = files[i]; i++) {
-      //     if (file.type.match(/image.*/)) {
-      //       var reader = new FileReader();
-
-      //       reader.onload = function (e2) {
-      //         var img = document.createElement('img');
-      //         img.src = e2.target.result;
-      //         ctx.drawImage(img, e.offsetX, e.offsetY);
-      //         let obj = {};
-      //         obj.x = e.offsetX;
-      //         obj.y = e.offsetY;
-      //         obj.img = img.src;
-      //         socket.emit("image", obj);
-      //       }
-
-      //       reader.readAsDataURL(file); // Start reading the file data
-      //     }
-      //   }
-      // });
-
       // Request the current game state
       socket.emit('requestState');
 
@@ -318,11 +322,6 @@
               ctx.lineTo(event.data.x, event.data.y);
               ctx.stroke();
               break;
-            // case 'image':
-            //   let img = new Image();
-            //   img.src = event.data.img;
-            //   img.onload = () => ctx.drawImage(img, event.data.x, event.data.y);
-            //   break;
             case 'colorChange':
               ctx.strokeStyle = event.data;
               break;
@@ -364,10 +363,12 @@
         }
       });
 
+      // sends to server to redirect draw.html to display.html endpoint
       socket.on('switchRoles', function () {
         window.location.href = '/display';
       });
 
+      // game resets to homepage when number of rounds = 4
       socket.on('reset', function () {
         window.location.href = '/homepage';
       });
@@ -390,14 +391,6 @@
         ctx.stroke();
       });
 
-      // socket.on('image', (obj) => {
-      //   let canvas = document.getElementById("myCanvas");
-      //   let ctx = canvas.getContext("2d");
-      //   let img = new Image();
-      //   img.src = obj.img;
-      //   ctx.drawImage(img, obj.x, obj.y);
-      // });
-
       socket.on('colorChange', function (color) {
         ctx.strokeStyle = color; // Update stroke color
       });
@@ -409,6 +402,7 @@
 
       socket.on('wordSelection', function (word) {
         $('#wordDisplay').text("Word to draw: " + word);
+        
       });
 
       socket.on('eraser', function () {
@@ -453,6 +447,7 @@
         }, 3000);
       });
 
+      // server handles whether the guess is correct, close, or a synonym
       socket.on('correctGuess', function () {
         $('#popup').addClass('show');
         $('#canvas-container, #toolbox, #info-box, #wordDisplay').hide();
@@ -467,6 +462,7 @@
         }, 3000);
       });
 
+      // updates score
       socket.on('score', (score) => {
         $('#score').text(score);
       });
