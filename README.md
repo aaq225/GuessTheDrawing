@@ -6,6 +6,7 @@ npm install axios
 npm install socket
 
 Game Instructions:
+Run with node index.js 
 
 Login with a username 
 Wait for the second player to login 
