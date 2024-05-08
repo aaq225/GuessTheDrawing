@@ -1,3 +1,8 @@
+<!--
+Abdelrahman Qamhia: aaq225
+Zaara Yakub: zay225
+Titus Whang: juw225
+-->
 <!doctype html>
 <html>
 
@@ -26,7 +31,6 @@
       padding: 0;
       overflow-y: auto;
       max-height: 800px;
-      /* Limiting the height of the message list */
     }
 
     #messages li {
@@ -113,7 +117,6 @@
       margin-left: 10px;
     }
 
-    /* timer */
     .info-item img {
       width: 50px;
       display: block;
@@ -142,7 +145,6 @@
     <div id="info-box">
       <div class="info-item">
         <img src="images/clock_icon.png" alt="Clock Icon">
-        <!-- <label for="timer">Timer:</label> -->
         <p><span id="timeRemaining">45</span> seconds remaining</p>
       </div>
       <div class="info-item">
@@ -179,7 +181,7 @@
     let currentScore = 0;
     let currentRound = 1;
 
-    // Initialize drawing properties
+    // default drawing settings
     ctx.strokeStyle = "#000000";
     ctx.lineWidth = 5;
 
@@ -195,80 +197,76 @@
       ctx.stroke();
     });
 
-    // socket.on('image', (obj) => {
-    //   let img = new Image();
-    //   img.src = obj.img;
-    //   ctx.drawImage(img, obj.x, obj.y);
-    // });
-
-    // Listen for color change event from draw.html
+    // Listening for color change event from draw.html
     socket.on('colorChange', function (color) {
-      ctx.strokeStyle = color; // Update stroke color
+      ctx.strokeStyle = color; // Updating stroke color
     });
 
-    // Listen for width change event from draw.html
+    // Listening for width change event from draw.html
     socket.on('widthChange', function (width) {
-      ctx.lineWidth = width; // Update stroke width
+      ctx.lineWidth = width; // Updating stroke width
     });
 
     socket.on('wordSelection', function () {
       $('#messages').prepend($('<li>').text("Game start!"));
     });
 
-    // Listen for eraser event from draw.html
+    // Listening for eraser event from draw.html
     socket.on('eraser', function () {
-      ctx.strokeStyle = "#ffffff"; // Set color to white for erasing
+      ctx.strokeStyle = "#ffffff"; // Setting color to white for erasing
     });
 
+    // Listening for clear event from draw.html
     socket.on('clearCanvas', function () {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.clearRect(0, 0, canvas.width, canvas.height); // Clearing the Canvas
     });
 
+    // Listening for chat messages
     socket.on('chat message', function (msg) {
       $('#messages').prepend($('<li>').text(msg));
     });
 
     $(function () {
       $('form').submit(function (e) {
-        e.preventDefault(); // Prevents page reloading
+        e.preventDefault(); // this stops the page from refreshing
         socket.emit('chat message', $('#m').val());
         $('#m').val('');
         return false;
       });
     });
 
+    // Switching to /draw from /display so we can alternate roles
     socket.on('switchRoles', function () {
       window.location.href = '/draw';
     });
 
+    // when the game is done, go back to /homepage
     socket.on('reset', function () {
       window.location.href = '/homepage';
     });
 
+    // Listening for the score update event
     socket.on('score', (score) => {
-      currentScore = score; // Update the currentScore variable
+      currentScore = score; // Updating the currentScore variable
       $('#score').text(score);
     });
 
+    // Listening for the round update event
     socket.on('round', (round) => {
-      currentRound = round; // Update the currentRound variable
+      currentRound = round; // Updating the currentRound variable
       $('#round').text(round);
     });
 
-    // Listen for the event from the server indicating a correct guess
+    // Listening for the event from the server indicating a correct guess
     socket.on('correctGuess', function () {
-      // Show the popup
+      // Showing the popup ONLY
       $('#popup').addClass('show');
-
-      // Hide the canvas, color palette, their containing divs, chatbox, and chat messages
       $('#canvas-container, #toolbox, #messages, form, #info-box').hide();
-
-      // Hide the background color by adding a class to the body
       $('body').addClass('background-only');
       $('#popupScoreCorrect').text(currentScore);
       $('#popupRoundCorrect').text(currentRound);
 
-      // Hide the background color and restore canvas, color palette, their containing divs, chatbox, and chat messages after 3 seconds
+      // Restore state after 3 seconds of the popup
       setTimeout(function () {
         $('#popup').removeClass('show');
         $('#canvas-container, #toolbox, #messages, form').show();
@@ -276,14 +274,14 @@
       }, 3000);
     });
 
-    // Request the current game state
+    // Requesting the current game state
     socket.emit('requestState');
 
-    // Restore the canvas, color, and timer
+    // Restoring the canvas, color, and timer by clearing everything and drawing it again (this is functional most of the time, I tried)
     socket.on('restoreState', function (state) {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Redraw all canvas events
+      // Redrawing all canvas events
       state.canvas.forEach(event => {
         switch (event.type) {
           case 'mdown':
@@ -294,11 +292,6 @@
             ctx.lineTo(event.data.x, event.data.y);
             ctx.stroke();
             break;
-          // case 'image':
-          //   let img = new Image();
-          //   img.src = event.data.img;
-          //   img.onload = () => ctx.drawImage(img, event.data.x, event.data.y);
-          //   break;
           case 'colorChange':
             ctx.strokeStyle = event.data;
             break;
@@ -311,11 +304,11 @@
         }
       });
 
-      // Restore color and stroke width
+      // Restoring color and stroke width
       ctx.strokeStyle = state.color;
       ctx.lineWidth = state.width;
 
-      // Update timer
+      // Updating timer in real time
       $('#timeRemaining').text(state.timer);
       if (state.score) {
         $('#score').text(state.score);
@@ -334,11 +327,12 @@
       window.location.reload(true);
     });
 
-    // Update only the text of the timer
+    // Updating the timer text
     socket.on('timer', (remaining) => {
       $('#timeRemaining').text(remaining);
     });
 
+    // Showing the time is up popup when time is up, hiding appropriate things and restoring after 3 seconds
     socket.on('timeUp', function () {
       $('#timeUpPopup').addClass('show');
       $('#canvas-container, #toolbox, #messages, form, #info-box').hide();

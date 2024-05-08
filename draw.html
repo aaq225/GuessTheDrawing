@@ -1,3 +1,8 @@
+<!--
+Abdelrahman Qamhia: aaq225
+Zaara Yakub: zay225
+Titus Whang: juw225
+-->
 <!doctype html>
 <html>
 
@@ -104,7 +109,6 @@
       margin-left: 10px;
     }
 
-    /* timer */
     .info-item img {
       width: 50px;
       display: block;
@@ -158,7 +162,6 @@
 </head>
 
 <body>
-  <!-- <header>You are the drawer</header> -->
   <div id="container">
     <div id="canvas-container">
       <canvas id="myCanvas" width="800" height="800"></canvas>
@@ -195,7 +198,6 @@
     <div id="info-box">
       <div class="info-item">
         <img src="images/clock_icon.png" alt="Clock Icon">
-        <!-- <label for="timer">Timer:</label> -->
         <p><span id="timeRemaining">45</span> seconds remaining</p>
       </div>
       <div class="info-item">
@@ -239,7 +241,7 @@
       let currentScore = 0;
       let currentRound = 1;
 
-      // Initialize drawing properties
+      // Default drawing settings
       ctx.strokeStyle = "#000000";
       ctx.lineWidth = 5;
 
@@ -249,13 +251,13 @@
         socket.emit('colorChange', color);
       }
 
-      // Handle category selection by the drawer
+      // Handling category selection by the drawer
       $('#selectCategory').click(function () {
         let category = $('#category').val();
         socket.emit('categorySelection', category);
       });
 
-      // Set color from palette
+      // Setting color from palette
       $('.color-box').click(function () {
         let color = $(this).css("background-color");
         setColor(color);
@@ -270,7 +272,7 @@
 
       // Function to set eraser mode
       $('#eraser').click(function () {
-        ctx.strokeStyle = "#ffffff"; // Set color to white for erasing
+        ctx.strokeStyle = "#ffffff"; // Setting color to white for erasing
         socket.emit('eraser');
       });
 
@@ -309,14 +311,13 @@
         isDrawing = false;
       });
 
-      // Request the current game state
+      // Requesting the current game state
       socket.emit('requestState');
 
-      // Restore the canvas, color, and timer
+      // Restoring the canvas, color, and timer by clearing everything and drawing it again (this is functional most of the time, I tried)
       socket.on('restoreState', function (state) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        // Redraw all canvas events
         state.canvas.forEach(event => {
           switch (event.type) {
             case 'mdown':
@@ -340,15 +341,15 @@
           }
         });
 
-        // Restore color and stroke width
+        // Restoring color and stroke width
         ctx.strokeStyle = state.color;
         ctx.lineWidth = state.width;
         $('#strokeWidth').val(state.width);
 
-        // Update timer
+        // Updating timer text in real time
         $('#timeRemaining').text(state.timer);
 
-        // Update word display
+        // Updating word display with the chosen word
         if (state.word) {
           $('#wordDisplay').text("Word to draw: " + state.word);
         } else {
@@ -397,21 +398,21 @@
       });
 
       socket.on('colorChange', function (color) {
-        ctx.strokeStyle = color; // Update stroke color
+        ctx.strokeStyle = color;
       });
 
       socket.on('widthChange', function (width) {
-        ctx.lineWidth = width; // Update stroke width
+        ctx.lineWidth = width;
         $('#strokeWidth').val(width);
       });
 
       socket.on('wordSelection', function (word) {
         $('#wordDisplay').text("Word to draw: " + word);
-        
+
       });
 
       socket.on('eraser', function () {
-        ctx.strokeStyle = "#ffffff"; // Set color to white for erasing
+        ctx.strokeStyle = "#ffffff";
       });
 
       socket.on('clearCanvas', function () {
@@ -422,21 +423,24 @@
         window.location.reload(true);
       });
 
-      // Update only the timer text
+      // Updating the timer text
       socket.on('timer', (remaining) => {
         $('#timeRemaining').text(remaining);
       });
 
+      // Listening for the score update event
       socket.on('score', (score) => {
-        currentScore = score; // Update the currentScore variable
+        currentScore = score; // Updating the currentScore variable
         $('#score').text(score);
       });
 
+      // Listening for the round update event
       socket.on('round', (round) => {
-        currentRound = round; // Update the currentRound variable
+        currentRound = round; // Updating the currentRound variable
         $('#round').text(round);
       });
 
+      // Showing the time is up popup when time is up, hiding appropriate things and restoring after 3 seconds
       socket.on('timeUp', function () {
         $('#timeUpPopup').addClass('show');
         $('#canvas-container, #toolbox, #info-box, #word-box').hide();
@@ -452,7 +456,7 @@
         }, 3000);
       });
 
-      // server handles whether the guess is correct, close, or a synonym
+      // Showing the correct guess popup, hiding appropriate things and restoring after 3 seconds
       socket.on('correctGuess', function () {
         $('#popup').addClass('show');
         $('#canvas-container, #toolbox, #info-box, #wordDisplay, #word-box').hide();

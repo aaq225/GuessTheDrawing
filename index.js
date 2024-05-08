@@ -1,4 +1,9 @@
 /*
+Abdelrahman Qamhia: aaq225
+Zaara Yakub: zay225
+Titus Whang: juw225
+
+
 Game Instructions:
 
 Login with a username 
@@ -44,9 +49,9 @@ app.use(bodyParser.urlencoded({ extended: true }));
 let player1 = null;
 let player2 = null;
 let currentWord = '';
-let canvasState = []; // Store the series of drawing events
+let canvasState = []; // will use to store the series of drawing events so we can restore canvas state if user refreshes
 let timer = null;
-let remainingTime = 45; // Initial timer duration
+let remainingTime = 45; // This will be our timer duration
 let currentColor = "#000000"; // Default color
 let currentWidth = 12; // Default stroke width
 let currentScore = 0;
@@ -109,14 +114,15 @@ app.get('/display', function (req, res) {
   }
 });
 
+// From the @2toad/profanity Library API documentation
 const options = new ProfanityOptions();
-options.wholeWord = true; // Adjust options as necessary
+options.wholeWord = true;
 options.grawlix = '*****';
 
 const profanityFilter = new Profanity(options);
 
-// Initialize the dictionary API
-const API_KEY = '2f813304-ff2f-4e72-89a8-363b6ab13040'; // Replace with your Merriam-Webster API key
+// This is adapted from the Merriam Webster Dictionary API Documentation
+const API_KEY = '2f813304-ff2f-4e72-89a8-363b6ab13040';
 async function getSynonyms(targetWord) {
   const url = `https://www.dictionaryapi.com/api/v3/references/thesaurus/json/${encodeURIComponent(targetWord)}?key=${API_KEY}`;
 
@@ -136,11 +142,13 @@ async function getSynonyms(targetWord) {
   }
 }
 
+// Function to check if a the guess is a synonym, it will use the sysnonym list from the dictionary API call
 async function checkSynonym(targetWord, guess) {
   const synonyms = await getSynonyms(targetWord);
   return synonyms.includes(guess.toLowerCase());
 }
 
+// List of text files defined (we had chatgpt generate these text files)
 const wordCategories = {
   flags: readWords('flags.txt'),
   animals: readWords('animals.txt'),
@@ -149,12 +157,13 @@ const wordCategories = {
   verbs: readWords('verbs.txt')
 };
 
+// Function that will issue a score and round update when called
 function updateScoreAndRound() {
   io.emit('score', currentScore);
   io.emit('round', currentRound);
 }
 
-// Start the round timer
+// Starting the round timer
 function startTimer(duration, callback) {
   let remaining = duration;
   timer = setInterval(() => {
@@ -170,11 +179,11 @@ function startTimer(duration, callback) {
   }, 1000);
 }
 
-
+// Function to reset the status of the game 
 function resetGame() {
   currentWord = '';
   canvasState = [];
-  remainingTime = 45; 
+  remainingTime = 45;
   if (currentRound == 4) {
     currentRound = 0;
     currentScore = 0;
@@ -183,15 +192,15 @@ function resetGame() {
     player1 = null;
     player2 = null;
     setTimeout(() => {
-      // res.redirect('/reset');
       io.emit('reset');
     }, 2500);
   }
   currentRound += 1;
 }
 
-// Handle socket connections
+// Handling socket connections
 io.on('connection', function (socket) {
+  // This will randomly choose a word from the category of the user choice.
   socket.on('categorySelection', async function (category) {
     if (currentWord == '') {
       const words = wordCategories[category];
@@ -203,7 +212,7 @@ io.on('connection', function (socket) {
       console.log('Synonyms:', synonyms);
 
       io.emit('wordSelection', currentWord);
-      remainingTime = 45; 
+      remainingTime = 45;
       io.emit('timer', remainingTime);
 
       clearInterval(timer);
@@ -240,7 +249,7 @@ io.on('connection', function (socket) {
   });
 
   socket.on('widthChange', function (width) {
-    currentWidth = width; 
+    currentWidth = width;
     canvasState.push({ type: 'widthChange', data: width });
     io.emit('widthChange', width);
   });
@@ -256,17 +265,17 @@ io.on('connection', function (socket) {
   });
 
   socket.on('chat message', async function (msg) {
-    // Trim and ensure the message isn't empty or consists only of whitespace
+    // Trimming and ensuring the message isn't empty or has white spaces
     if (msg && msg.trim()) {
       let processedMessage = msg.trim();
       let feedback = '';
 
-      // Check for profanity
+      // Checking for profanity as per API documnetation and censoring if so
       if (profanityFilter.exists(processedMessage)) {
         processedMessage = profanityFilter.censor(processedMessage);
       }
 
-      // Check if it's a correct guess or synonym
+      // Checking if it's a correct guess or synonym and sending an appropriate chat msg
       if (currentWord && processedMessage.toLowerCase() === currentWord.toLowerCase()) {
         feedback = 'Correct guess! (Switching turns in 3 seconds.)';
         currentScore += remainingTime;
@@ -292,14 +301,13 @@ io.on('connection', function (socket) {
         }
       }
 
-      // Construct the final message with optional feedback
       const finalMessage = feedback ? `${processedMessage} (${feedback})` : processedMessage;
       io.emit('chat message', finalMessage);
     }
   });
 
 
-  // Provide the current game state upon request
+  // Give game status when client requests it
   socket.on('requestState', function () {
     socket.emit('restoreState', {
       canvas: canvasState,
@@ -312,9 +320,8 @@ io.on('connection', function (socket) {
     });
   });
 
-  // Force refresh clients
+  // Force refresh clients (this solved the problem of having to manually refresh when url is redirected)
   socket.on('forceRefresh', () => {
-    // socket.emit('forceRefresh');
     if (window.location.pathname === '/homepage') {
       window.location.reload();
     }
