@@ -26,3 +26,11 @@ At the end of each 45-second round, the guesser and drawer will "switch roles"
 the guesser is redirected to the drawing page (draw.html), and the drawer is redirected the to the guessing page (display.html). 
 
 At the end of 4 rounds, the overall score for the game is displayed, and both players are redirected to the homepage to play again.
+
+![img1](https://github.com/aaq225/GuessTheDrawing/assets/123427105/b619b8ad-1640-4222-9332-e9043c727357)
+![img2](https://github.com/aaq225/GuessTheDrawing/assets/123427105/a0ab7801-30ab-4e5d-a7ba-2b7baaa6c9d2)
+![img3](https://github.com/aaq225/GuessTheDrawing/assets/123427105/16bf5313-aa62-4f3c-a82f-df7f9910f348)
+![img4](https://github.com/aaq225/GuessTheDrawing/assets/123427105/7224124a-fa17-43c5-bd46-6c0fd44faf55)
+![img5](https://github.com/aaq225/GuessTheDrawing/assets/123427105/47c1c7d9-55c0-44af-8adc-8825d53fba56)
+
+
