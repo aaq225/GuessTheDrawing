@@ -27,6 +27,11 @@ the guesser is redirected to the drawing page (draw.html), and the drawer is red
 
 At the end of 4 rounds, the overall score for the game is displayed, and both players are redirected to the homepage to play again.
 
+# Some Cool Features:
+1. Profanity Filter
+2. Close Guess Flagging using the Levenshtein Distance Algorithm
+3. Synonym Checking using Merriam-Webster Dictionary API
+
 ![img1](https://github.com/aaq225/GuessTheDrawing/assets/123427105/b619b8ad-1640-4222-9332-e9043c727357)
 ![img2](https://github.com/aaq225/GuessTheDrawing/assets/123427105/a0ab7801-30ab-4e5d-a7ba-2b7baaa6c9d2)
 ![img3](https://github.com/aaq225/GuessTheDrawing/assets/123427105/16bf5313-aa62-4f3c-a82f-df7f9910f348)
