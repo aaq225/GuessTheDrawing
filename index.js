@@ -122,7 +122,8 @@ options.grawlix = '*****';
 const profanityFilter = new Profanity(options);
 
 // This is adapted from the Merriam Webster Dictionary API Documentation
-const API_KEY = '2f813304-ff2f-4e72-89a8-363b6ab13040';
+// REPLACE WITH YOUR OWN API KEY
+const API_KEY = '';
 async function getSynonyms(targetWord) {
   const url = `https://www.dictionaryapi.com/api/v3/references/thesaurus/json/${encodeURIComponent(targetWord)}?key=${API_KEY}`;
 
