@@ -1,9 +1,6 @@
-Guess the drawing game for cse264 Final Project
-
+# Guess the drawing game using HTML, CSS, JS, Express.js, Node.js
 Node Modules to install before running this:
-npm install express --save
-npm install axios 
-npm install socket
+npm install
 
 Game Instructions:
 Run with node index.js 
