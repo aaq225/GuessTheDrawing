@@ -1,4 +1,4 @@
-# Guess the drawing game using HTML, CSS, JS, Express.js, Node.js
+# Guess the drawing game using HTML, CSS, JS, Node.js, Express.js ,Socket.io
 Node Modules to install before running this:
 npm install
 
